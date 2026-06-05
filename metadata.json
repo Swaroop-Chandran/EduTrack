@@ -1,0 +1,6 @@
+{
+  "name": "EduTrack LMS",
+  "description": "A comprehensive, high-fidelity Learning Management System for students, teachers, and administrators to manage courses, assignments, attendance, exams, results, and placements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
