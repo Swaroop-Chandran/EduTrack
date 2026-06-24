@@ -200,6 +200,25 @@ $pageTitle = getPageTitle($currentTab, $currentUser['role']);
     <!-- Initialize Lucide Icons -->
     <script>
         lucide.createIcons();
+
+        function lockBackgroundScroll() {
+            const mainEl = document.querySelector('main');
+            if (mainEl) {
+                mainEl.dataset.prevScrollTop = mainEl.scrollTop;
+                mainEl.style.overflowY = 'hidden';
+            }
+        }
+
+        function unlockBackgroundScroll() {
+            const mainEl = document.querySelector('main');
+            if (mainEl) {
+                mainEl.style.overflowY = '';
+                if (mainEl.dataset.prevScrollTop !== undefined) {
+                    mainEl.scrollTop = parseInt(mainEl.dataset.prevScrollTop, 10);
+                    delete mainEl.dataset.prevScrollTop;
+                }
+            }
+        }
     </script>
 </body>
 </html>

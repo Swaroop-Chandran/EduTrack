@@ -225,117 +225,125 @@ $allStudents = $studentsStmt->fetchAll();
                 </table>
             </div>
         </div>
+    </div>
 
-        <!-- Student Add/Edit Modal -->
-        <div id="student_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
-            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-lg relative max-h-[90vh] overflow-y-auto animate-modalContent">
-                <button onclick="closeStudentModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+    <!-- Student Add/Edit Modal -->
+    <div id="student_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+        <form id="student_form" action="actions.php?action=add_student" method="POST" class="bg-white border border-[#E2E8F0] rounded-xl w-full max-w-lg shadow-lg relative max-h-[85vh] flex flex-col overflow-hidden animate-modalContent text-xs font-bold">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0 flex items-center justify-between">
+                <h3 id="student_modal_title" class="text-lg font-extrabold text-[#0F172A]">Admit Student Scholar Profile</h3>
+                <button type="button" onclick="closeStudentModal();" class="text-slate-400 hover:text-slate-600 cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
-                <h3 id="student_modal_title" class="text-lg font-extrabold text-[#0F172A] pb-2 border-b border-slate-50">Admit Student Scholar Profile</h3>
-
-                <form id="student_form" action="actions.php?action=add_student" method="POST" class="space-y-4 mt-4 text-xs font-bold">
-                    <input type="hidden" name="user_id" id="stu_user_id" value="" />
-                    
-                    <div>
-                        <label class="block text-slate-500 mb-1">Scholar Full Name</label>
-                        <input type="text" name="name" id="stu_name" class="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 text-xs" required />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-slate-500 mb-1">Academic Email Profile</label>
-                            <input type="email" name="email" id="stu_email" class="w-full border p-2 rounded focus:ring-1 text-xs" required />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Mobile Phone contact</label>
-                            <input type="text" name="phone" id="stu_phone" class="w-full border p-2 rounded text-xs" placeholder="9458621530" />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-slate-500 mb-1">Institutional Roll Number</label>
-                            <input type="text" name="roll_no" id="stu_roll" placeholder="RSET-CS-101" class="w-full border p-2 rounded focus:ring-1 text-xs" required />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Select Department sector</label>
-                            <select name="department_id" id="stu_dept" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
-                                <?php foreach ($departmentsList as $d): ?>
-                                    <option value="<?php echo $d['id']; ?>"><?php echo htmlspecialchars($d['name']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-slate-500 mb-1">Year</label>
-                            <input type="number" name="year" id="stu_year" value="1" class="w-full border p-2 rounded text-xs" />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Semester</label>
-                            <input type="number" name="semester" id="stu_sem" value="1" class="w-full border p-2 rounded text-xs" />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Birth DOB</label>
-                            <input type="date" name="dob" id="stu_dob" class="w-full border p-1.5 rounded font-mono text-xs" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-slate-500 mb-1">Full Permanent Address</label>
-                        <input type="text" name="address" id="stu_address" class="w-full border p-2 rounded text-xs" />
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
-                        <button type="button" onclick="closeStudentModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8]">Save Scholar Credentials</button>
-                    </div>
-                </form>
             </div>
-        </div>
 
-        <script>
-            function openAddStudentModal() {
-                document.getElementById('student_form').action = "actions.php?action=add_student";
-                document.getElementById('stu_user_id').value = "";
-                document.getElementById('stu_name').value = "";
-                document.getElementById('stu_email').value = "";
-                document.getElementById('stu_phone').value = "";
-                document.getElementById('stu_roll').value = "";
-                document.getElementById('stu_year').value = "1";
-                document.getElementById('stu_sem').value = "1";
-                document.getElementById('stu_dob').value = "";
-                document.getElementById('stu_address').value = "";
-                document.getElementById('student_modal_title').innerText = "Admit Student Scholar Profile";
-                document.getElementById('student_modal').classList.remove('hidden');
-            }
-            function openEditStudentModal(id, name, email, phone, roll, deptId, year, sem, dob, address) {
-                document.getElementById('student_form').action = "actions.php?action=edit_student";
-                document.getElementById('stu_user_id').value = id;
-                document.getElementById('stu_name').value = name;
-                document.getElementById('stu_email').value = email;
-                document.getElementById('stu_phone').value = phone;
-                document.getElementById('stu_roll').value = roll;
-                document.getElementById('stu_dept').value = deptId;
-                document.getElementById('stu_year').value = year;
-                document.getElementById('stu_sem').value = sem;
-                document.getElementById('stu_dob').value = dob;
-                document.getElementById('stu_address').value = address;
-                document.getElementById('student_modal_title').innerText = "Modify Student Scholar details";
-                document.getElementById('student_modal').classList.remove('hidden');
-            }
-            function closeStudentModal() {
-                document.getElementById('student_modal').classList.add('hidden');
-            }
-            
-            // Auto open if redirected
-            if (<?php echo $openAdd; ?>) {
-                openAddStudentModal();
-            }
-        </script>
+            <!-- Modal Body (scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4 text-left">
+                <input type="hidden" name="user_id" id="stu_user_id" value="" />
+                
+                <div>
+                    <label class="block text-slate-500 mb-1">Scholar Full Name</label>
+                    <input type="text" name="name" id="stu_name" class="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 text-xs" required />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Academic Email Profile</label>
+                        <input type="email" name="email" id="stu_email" class="w-full border p-2 rounded focus:ring-1 text-xs" required />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Mobile Phone contact</label>
+                        <input type="text" name="phone" id="stu_phone" class="w-full border p-2 rounded text-xs" placeholder="9458621530" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Institutional Roll Number</label>
+                        <input type="text" name="roll_no" id="stu_roll" placeholder="RSET-CS-101" class="w-full border p-2 rounded focus:ring-1 text-xs" required />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Select Department sector</label>
+                        <select name="department_id" id="stu_dept" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
+                            <?php foreach ($departmentsList as $d): ?>
+                                <option value="<?php echo $d['id']; ?>"><?php echo htmlspecialchars($d['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Year</label>
+                        <input type="number" name="year" id="stu_year" value="1" class="w-full border p-2 rounded text-xs" />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Semester</label>
+                        <input type="number" name="semester" id="stu_sem" value="1" class="w-full border p-2 rounded text-xs" />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Birth DOB</label>
+                        <input type="date" name="dob" id="stu_dob" class="w-full border p-1.5 rounded font-mono text-xs" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Full Permanent Address</label>
+                    <input type="text" name="address" id="stu_address" class="w-full border p-2 rounded text-xs" />
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex justify-end gap-2 flex-shrink-0">
+                <button type="button" onclick="closeStudentModal();" class="px-4 py-2 border rounded bg-white hover:bg-slate-50 cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] cursor-pointer">Save Scholar Credentials</button>
+            </div>
+        </form>
     </div>
+
+    <script>
+        function openAddStudentModal() {
+            document.getElementById('student_form').action = "actions.php?action=add_student";
+            document.getElementById('stu_user_id').value = "";
+            document.getElementById('stu_name').value = "";
+            document.getElementById('stu_email').value = "";
+            document.getElementById('stu_phone').value = "";
+            document.getElementById('stu_roll').value = "";
+            document.getElementById('stu_year').value = "1";
+            document.getElementById('stu_sem').value = "1";
+            document.getElementById('stu_dob').value = "";
+            document.getElementById('stu_address').value = "";
+            document.getElementById('student_modal_title').innerText = "Admit Student Scholar Profile";
+            document.getElementById('student_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function openEditStudentModal(id, name, email, phone, roll, deptId, year, sem, dob, address) {
+            document.getElementById('student_form').action = "actions.php?action=edit_student";
+            document.getElementById('stu_user_id').value = id;
+            document.getElementById('stu_name').value = name;
+            document.getElementById('stu_email').value = email;
+            document.getElementById('stu_phone').value = phone;
+            document.getElementById('stu_roll').value = roll;
+            document.getElementById('stu_dept').value = deptId;
+            document.getElementById('stu_year').value = year;
+            document.getElementById('stu_sem').value = sem;
+            document.getElementById('stu_dob').value = dob;
+            document.getElementById('stu_address').value = address;
+            document.getElementById('student_modal_title').innerText = "Modify Student Scholar details";
+            document.getElementById('student_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function closeStudentModal() {
+            document.getElementById('student_modal').classList.add('hidden');
+            unlockBackgroundScroll();
+        }
+        
+        // Auto open if redirected
+        if (<?php echo $openAdd; ?>) {
+            openAddStudentModal();
+        }
+    </script>
 
 <?php elseif ($currentTab === 'teachers'): ?>
     <!-- ADMIN TEACHERS Registry -->
@@ -415,104 +423,112 @@ $allStudents = $studentsStmt->fetchAll();
                 </table>
             </div>
         </div>
+    </div>
 
-        <!-- Teacher Add/Edit Modal -->
-        <div id="teacher_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
-            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-lg relative max-h-[90vh] overflow-y-auto animate-modalContent">
-                <button onclick="closeTeacherModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+    <!-- Teacher Add/Edit Modal -->
+    <div id="teacher_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+        <form id="teacher_form" action="actions.php?action=add_teacher" method="POST" class="bg-white border border-[#E2E8F0] rounded-xl w-full max-w-lg shadow-lg relative max-h-[85vh] flex flex-col overflow-hidden animate-modalContent text-xs font-bold">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0 flex items-center justify-between">
+                <h3 id="teacher_modal_title" class="text-lg font-extrabold text-[#0F172A]">Appoint Faculty Professor</h3>
+                <button type="button" onclick="closeTeacherModal();" class="text-slate-400 hover:text-slate-600 cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
-                <h3 id="teacher_modal_title" class="text-lg font-extrabold text-[#0F172A] pb-2 border-b border-slate-50">Appoint Faculty Professor</h3>
-
-                <form id="teacher_form" action="actions.php?action=add_teacher" method="POST" class="space-y-4 mt-4 text-xs font-bold">
-                    <input type="hidden" name="user_id" id="tea_user_id" value="" />
-                    
-                    <div>
-                        <label class="block text-slate-500 mb-1">Professor Full Name</label>
-                        <input type="text" name="name" id="tea_name" class="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 text-xs" required />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-slate-500 mb-1">Academic Email</label>
-                            <input type="email" name="email" id="tea_email" class="w-full border p-2 rounded text-xs" required />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Mobile Contact Phone</label>
-                            <input type="text" name="phone" id="tea_phone" class="w-full border p-2 rounded text-xs" />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-slate-500 mb-1">Employee ID / Code</label>
-                            <input type="text" name="employee_id" id="tea_empid" class="w-full border p-2 rounded text-xs" required />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Select Department</label>
-                            <select name="department_id" id="tea_dept" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
-                                <?php foreach ($departmentsList as $d): ?>
-                                    <option value="<?php echo $d['id']; ?>"><?php echo htmlspecialchars($d['name']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-slate-500 mb-1">Designation</label>
-                            <input type="text" name="designation" id="tea_desig" class="w-full border p-2 rounded text-xs" required />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Qualifications</label>
-                            <input type="text" name="qualification" id="tea_qual" class="w-full border p-2 rounded text-xs" required />
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
-                        <button type="button" onclick="closeTeacherModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8]">Save Faculty Profile</button>
-                    </div>
-                </form>
             </div>
-        </div>
 
-        <script>
-            function openAddTeacherModal() {
-                document.getElementById('teacher_form').action = "actions.php?action=add_teacher";
-                document.getElementById('tea_user_id').value = "";
-                document.getElementById('tea_name').value = "";
-                document.getElementById('tea_email').value = "";
-                document.getElementById('tea_phone').value = "";
-                document.getElementById('tea_empid').value = "";
-                document.getElementById('tea_desig').value = "Assistant Professor";
-                document.getElementById('tea_qual').value = "M.Tech, Ph.D";
-                document.getElementById('teacher_modal_title').innerText = "Appoint Faculty Professor";
-                document.getElementById('teacher_modal').classList.remove('hidden');
-            }
-            function openEditTeacherModal(id, name, email, phone, empId, deptId, designation, qualification) {
-                document.getElementById('teacher_form').action = "actions.php?action=edit_teacher";
-                document.getElementById('tea_user_id').value = id;
-                document.getElementById('tea_name').value = name;
-                document.getElementById('tea_email').value = email;
-                document.getElementById('tea_phone').value = phone;
-                document.getElementById('tea_empid').value = empId;
-                document.getElementById('tea_dept').value = deptId;
-                document.getElementById('tea_desig').value = designation;
-                document.getElementById('tea_qual').value = qualification;
-                document.getElementById('teacher_modal_title').innerText = "Modify Faculty details";
-                document.getElementById('teacher_modal').classList.remove('hidden');
-            }
-            function closeTeacherModal() {
-                document.getElementById('teacher_modal').classList.add('hidden');
-            }
-            
-            // Auto open if redirected
-            if (<?php echo $openAdd; ?>) {
-                openAddTeacherModal();
-            }
-        </script>
+            <!-- Modal Body (scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4 text-left">
+                <input type="hidden" name="user_id" id="tea_user_id" value="" />
+                
+                <div>
+                    <label class="block text-slate-500 mb-1">Professor Full Name</label>
+                    <input type="text" name="name" id="tea_name" class="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 text-xs" required />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Academic Email</label>
+                        <input type="email" name="email" id="tea_email" class="w-full border p-2 rounded text-xs" required />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Mobile Contact Phone</label>
+                        <input type="text" name="phone" id="tea_phone" class="w-full border p-2 rounded text-xs" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Employee ID / Code</label>
+                        <input type="text" name="employee_id" id="tea_empid" class="w-full border p-2 rounded text-xs" required />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Select Department</label>
+                        <select name="department_id" id="tea_dept" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
+                            <?php foreach ($departmentsList as $d): ?>
+                                <option value="<?php echo $d['id']; ?>"><?php echo htmlspecialchars($d['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Designation</label>
+                        <input type="text" name="designation" id="tea_desig" class="w-full border p-2 rounded text-xs" required />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Qualifications</label>
+                        <input type="text" name="qualification" id="tea_qual" class="w-full border p-2 rounded text-xs" required />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex justify-end gap-2 flex-shrink-0">
+                <button type="button" onclick="closeTeacherModal();" class="px-4 py-2 border rounded bg-white hover:bg-slate-50 cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] cursor-pointer">Save Faculty Profile</button>
+            </div>
+        </form>
     </div>
+
+    <script>
+        function openAddTeacherModal() {
+            document.getElementById('teacher_form').action = "actions.php?action=add_teacher";
+            document.getElementById('tea_user_id').value = "";
+            document.getElementById('tea_name').value = "";
+            document.getElementById('tea_email').value = "";
+            document.getElementById('tea_phone').value = "";
+            document.getElementById('tea_empid').value = "";
+            document.getElementById('tea_desig').value = "Assistant Professor";
+            document.getElementById('tea_qual').value = "M.Tech, Ph.D";
+            document.getElementById('teacher_modal_title').innerText = "Appoint Faculty Professor";
+            document.getElementById('teacher_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function openEditTeacherModal(id, name, email, phone, empId, deptId, designation, qualification) {
+            document.getElementById('teacher_form').action = "actions.php?action=edit_teacher";
+            document.getElementById('tea_user_id').value = id;
+            document.getElementById('tea_name').value = name;
+            document.getElementById('tea_email').value = email;
+            document.getElementById('tea_phone').value = phone;
+            document.getElementById('tea_empid').value = empId;
+            document.getElementById('tea_dept').value = deptId;
+            document.getElementById('tea_desig').value = designation;
+            document.getElementById('tea_qual').value = qualification;
+            document.getElementById('teacher_modal_title').innerText = "Modify Faculty details";
+            document.getElementById('teacher_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function closeTeacherModal() {
+            document.getElementById('teacher_modal').classList.add('hidden');
+            unlockBackgroundScroll();
+        }
+        
+        // Auto open if redirected
+        if (<?php echo $openAdd; ?>) {
+            openAddTeacherModal();
+        }
+    </script>
 
 <?php elseif ($currentTab === 'departments'): ?>
     <!-- ADMIN DEPARTMENTS TAB -->
@@ -547,75 +563,83 @@ $allStudents = $studentsStmt->fetchAll();
                 </div>
             <?php endforeach; ?>
         </div>
+    </div>
 
-        <!-- Department Modal -->
-        <div id="dept_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
-            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-md shadow-lg relative animate-modalContent">
-                <button onclick="closeDeptModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+    <!-- Department Modal -->
+    <div id="dept_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+        <form id="dept_form" action="actions.php?action=add_department" method="POST" class="bg-white border border-[#E2E8F0] rounded-xl w-full max-w-md shadow-lg relative max-h-[85vh] flex flex-col overflow-hidden animate-modalContent text-xs font-bold">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0 flex items-center justify-between">
+                <h3 id="dept_modal_title" class="text-lg font-extrabold text-[#0F172A]">Configure Academic Sector</h3>
+                <button type="button" onclick="closeDeptModal();" class="text-slate-400 hover:text-slate-600 cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
-                <h3 id="dept_modal_title" class="text-lg font-extrabold text-[#0F172A] pb-2 border-b border-slate-50">Configure Academic Sector</h3>
-
-                <form id="dept_form" action="actions.php?action=add_department" method="POST" class="space-y-4 mt-4 text-xs font-bold">
-                    <input type="hidden" name="id" id="dept_id" value="" />
-                    
-                    <div>
-                        <label class="block text-slate-500 mb-1">Department Name</label>
-                        <input type="text" name="name" id="dept_name" class="w-full border p-2.5 rounded text-xs focus:ring-1" required />
-                    </div>
-
-                    <div>
-                        <label class="block text-slate-500 mb-1">Unique Code identifier</label>
-                        <input type="text" name="code" id="dept_code" class="w-full border p-2.5 rounded text-xs uppercase" required />
-                    </div>
-
-                    <div>
-                        <label class="block text-slate-500 mb-1">Appoint Department Head</label>
-                        <select name="head_id" id="dept_head" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
-                            <option value="">Select Department Head (Teacher)</option>
-                            <?php foreach ($allTeachers as $t): ?>
-                                <option value="<?php echo $t['id']; ?>"><?php echo htmlspecialchars($t['name']); ?> (<?php echo htmlspecialchars($t['employee_id']); ?>)</option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
-                        <button type="button" onclick="closeDeptModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8]">Save Department</button>
-                    </div>
-                </form>
             </div>
-        </div>
 
-        <script>
-            function openAddDeptModal() {
-                document.getElementById('dept_form').action = "actions.php?action=add_department";
-                document.getElementById('dept_id').value = "";
-                document.getElementById('dept_name').value = "";
-                document.getElementById('dept_code').value = "";
-                document.getElementById('dept_head').value = "";
-                document.getElementById('dept_modal_title').innerText = "Configure Academic Sector";
-                document.getElementById('dept_modal').classList.remove('hidden');
-            }
-            function openEditDeptModal(id, name, code, headId) {
-                document.getElementById('dept_form').action = "actions.php?action=edit_department";
-                document.getElementById('dept_id').value = id;
-                document.getElementById('dept_name').value = name;
-                document.getElementById('dept_code').value = code;
-                document.getElementById('dept_head').value = headId !== null ? headId : "";
-                document.getElementById('dept_modal_title').innerText = "Modify Department attributes";
-                document.getElementById('dept_modal').classList.remove('hidden');
-            }
-            function closeDeptModal() {
-                document.getElementById('dept_modal').classList.add('hidden');
-            }
-            
-            // Auto open
-            if (<?php echo $openAdd; ?>) {
-                openAddDeptModal();
-            }
-        </script>
+            <!-- Modal Body (scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4 text-left">
+                <input type="hidden" name="id" id="dept_id" value="" />
+                
+                <div>
+                    <label class="block text-slate-500 mb-1">Department Name</label>
+                    <input type="text" name="name" id="dept_name" class="w-full border p-2.5 rounded text-xs focus:ring-1" required />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Unique Code identifier</label>
+                    <input type="text" name="code" id="dept_code" class="w-full border p-2.5 rounded text-xs uppercase" required />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Appoint Department Head</label>
+                    <select name="head_id" id="dept_head" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
+                        <option value="">Select Department Head (Teacher)</option>
+                        <?php foreach ($allTeachers as $t): ?>
+                            <option value="<?php echo $t['id']; ?>"><?php echo htmlspecialchars($t['name']); ?> (<?php echo htmlspecialchars($t['employee_id']); ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex justify-end gap-2 flex-shrink-0">
+                <button type="button" onclick="closeDeptModal();" class="px-4 py-2 border rounded bg-white hover:bg-slate-50 cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] cursor-pointer">Save Department</button>
+            </div>
+        </form>
     </div>
+
+    <script>
+        function openAddDeptModal() {
+            document.getElementById('dept_form').action = "actions.php?action=add_department";
+            document.getElementById('dept_id').value = "";
+            document.getElementById('dept_name').value = "";
+            document.getElementById('dept_code').value = "";
+            document.getElementById('dept_head').value = "";
+            document.getElementById('dept_modal_title').innerText = "Configure Academic Sector";
+            document.getElementById('dept_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function openEditDeptModal(id, name, code, headId) {
+            document.getElementById('dept_form').action = "actions.php?action=edit_department";
+            document.getElementById('dept_id').value = id;
+            document.getElementById('dept_name').value = name;
+            document.getElementById('dept_code').value = code;
+            document.getElementById('dept_head').value = headId !== null ? headId : "";
+            document.getElementById('dept_modal_title').innerText = "Modify Department attributes";
+            document.getElementById('dept_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function closeDeptModal() {
+            document.getElementById('dept_modal').classList.add('hidden');
+            unlockBackgroundScroll();
+        }
+        
+        // Auto open
+        if (<?php echo $openAdd; ?>) {
+            openAddDeptModal();
+        }
+    </script>
 
 <?php elseif ($currentTab === 'courses'): ?>
     <!-- ADMIN COURSES CONFIG -->
@@ -723,151 +747,169 @@ $allStudents = $studentsStmt->fetchAll();
             </div>
         </div>
 
-        <!-- Course Add/Edit Modal -->
-        <div id="course_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
-            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-lg relative animate-modalContent">
-                <button onclick="closeCourseModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-                <h3 id="course_modal_title" class="text-lg font-extrabold text-[#0F172A] pb-2 border-b border-slate-50">Create Course catalog</h3>
-
-                <form id="course_form" action="actions.php?action=add_course" method="POST" class="space-y-4 mt-4 text-xs font-bold">
-                    <input type="hidden" name="id" id="crs_id" value="" />
-                    
-                    <div>
-                        <label class="block text-slate-500 mb-1">Course Title</label>
-                        <input type="text" name="title" id="crs_title" class="w-full border p-2.5 rounded text-xs" required />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-slate-500 mb-1">Course Code</label>
-                            <input type="text" name="code" id="crs_code" placeholder="CS401" class="w-full border p-2.5 rounded text-xs uppercase" required />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Academic Department</label>
-                            <select name="department_id" id="crs_dept" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
-                                <?php foreach ($departmentsList as $d): ?>
-                                    <option value="<?php echo $d['id']; ?>"><?php echo htmlspecialchars($d['name']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-slate-500 mb-1">Select Instructor</label>
-                            <select name="teacher_id" id="crs_teacher" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
-                                <?php foreach ($allTeachers as $t): ?>
-                                    <option value="<?php echo $t['id']; ?>"><?php echo htmlspecialchars($t['name']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Credits weight</label>
-                            <input type="number" name="credits" id="crs_credits" value="3" min="1" class="w-full border p-2 rounded text-xs" required />
-                        </div>
-                        <div>
-                            <label class="block text-slate-500 mb-1">Class Semester</label>
-                            <input type="number" name="semester" id="crs_sem" value="4" min="1" class="w-full border p-2 rounded text-xs" required />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-slate-500 mb-1">Catalog Description</label>
-                        <textarea name="description" id="crs_desc" rows="4" class="w-full border p-2.5 rounded text-xs font-mono" required></textarea>
-                    </div>
-
-                    <div id="crs_status_block" class="hidden">
-                        <label class="block text-slate-500 mb-1">Course Catalog status</label>
-                        <select name="status" id="crs_status" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
-                        <button type="button" onclick="closeCourseModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8]">Save Course catalog</button>
-                    </div>
-                </form>
             </div>
         </div>
-
-        <!-- Enroll Student Modal -->
-        <div id="enroll_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
-            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-md shadow-lg relative animate-modalContent">
-                <button onclick="closeEnrollStudentModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-                <h3 class="text-lg font-extrabold text-[#0F172A] pb-2 border-b border-slate-50">Enroll Student Scholar</h3>
-
-                <form action="actions.php?action=add_enrollment" method="POST" class="space-y-4 mt-4 text-xs font-bold">
-                    <div>
-                        <label class="block text-slate-500 mb-1">Select Student Scholar</label>
-                        <select name="student_id" class="w-full border p-2.5 rounded bg-white text-slate-700 text-xs">
-                            <?php foreach ($allStudents as $st): ?>
-                                <option value="<?php echo $st['id']; ?>"><?php echo htmlspecialchars($st['name']); ?> (<?php echo htmlspecialchars($st['roll_no']); ?>)</option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-slate-500 mb-1">Select course catalog</label>
-                        <select name="course_id" class="w-full border p-2.5 rounded bg-white text-slate-700 text-xs">
-                            <?php foreach ($allCourses as $c): ?>
-                                <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['code']); ?> - <?php echo htmlspecialchars($c['title']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
-                        <button type="button" onclick="closeEnrollStudentModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#0F172A] text-white rounded hover:bg-[#1E293B]">Confirm Enrollment</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <script>
-            function openAddCourseModal() {
-                document.getElementById('course_form').action = "actions.php?action=add_course";
-                document.getElementById('crs_id').value = "";
-                document.getElementById('crs_title').value = "";
-                document.getElementById('crs_code').value = "";
-                document.getElementById('crs_credits').value = "3";
-                document.getElementById('crs_sem').value = "4";
-                document.getElementById('crs_desc').value = "";
-                document.getElementById('crs_status_block').classList.add('hidden');
-                document.getElementById('course_modal_title').innerText = "Create Course catalog";
-                document.getElementById('course_modal').classList.remove('hidden');
-            }
-            function openEditCourseModal(id, title, code, deptId, teacherId, credits, sem, desc, status) {
-                document.getElementById('course_form').action = "actions.php?action=edit_course";
-                document.getElementById('crs_id').value = id;
-                document.getElementById('crs_title').value = title;
-                document.getElementById('crs_code').value = code;
-                document.getElementById('crs_dept').value = deptId;
-                document.getElementById('crs_teacher').value = teacherId;
-                document.getElementById('crs_credits').value = credits;
-                document.getElementById('crs_sem').value = sem;
-                document.getElementById('crs_desc').value = desc;
-                document.getElementById('crs_status').value = status;
-                document.getElementById('crs_status_block').classList.remove('hidden');
-                document.getElementById('course_modal_title').innerText = "Modify Course Catalog details";
-                document.getElementById('course_modal').classList.remove('hidden');
-            }
-            function closeCourseModal() {
-                document.getElementById('course_modal').classList.add('hidden');
-            }
-            function openEnrollStudentModal() {
-                document.getElementById('enroll_modal').classList.remove('hidden');
-            }
-            function closeEnrollStudentModal() {
-                document.getElementById('enroll_modal').classList.add('hidden');
-            }
-        </script>
     </div>
+
+    <!-- Course Add/Edit Modal -->
+    <div id="course_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+        <form id="course_form" action="actions.php?action=add_course" method="POST" class="bg-white border border-[#E2E8F0] rounded-xl w-full max-w-lg shadow-lg relative max-h-[85vh] flex flex-col overflow-hidden animate-modalContent text-xs font-bold">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0 flex items-center justify-between">
+                <h3 id="course_modal_title" class="text-lg font-extrabold text-[#0F172A]">Create Course catalog</h3>
+                <button type="button" onclick="closeCourseModal();" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4 text-left">
+                <input type="hidden" name="id" id="crs_id" value="" />
+                
+                <div>
+                    <label class="block text-slate-500 mb-1">Course Title</label>
+                    <input type="text" name="title" id="crs_title" class="w-full border p-2.5 rounded text-xs" required />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Course Code</label>
+                        <input type="text" name="code" id="crs_code" placeholder="CS401" class="w-full border p-2.5 rounded text-xs uppercase" required />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Academic Department</label>
+                        <select name="department_id" id="crs_dept" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
+                            <?php foreach ($departmentsList as $d): ?>
+                                <option value="<?php echo $d['id']; ?>"><?php echo htmlspecialchars($d['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Select Instructor</label>
+                        <select name="teacher_id" id="crs_teacher" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
+                            <?php foreach ($allTeachers as $t): ?>
+                                <option value="<?php echo $t['id']; ?>"><?php echo htmlspecialchars($t['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Credits weight</label>
+                        <input type="number" name="credits" id="crs_credits" value="3" min="1" class="w-full border p-2 rounded text-xs" required />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Class Semester</label>
+                        <input type="number" name="semester" id="crs_sem" value="4" min="1" class="w-full border p-2 rounded text-xs" required />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Catalog Description</label>
+                    <textarea name="description" id="crs_desc" rows="4" class="w-full border p-2.5 rounded text-xs font-mono" required></textarea>
+                </div>
+
+                <div id="crs_status_block" class="hidden">
+                    <label class="block text-slate-500 mb-1">Course Catalog status</label>
+                    <select name="status" id="crs_status" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex justify-end gap-2 flex-shrink-0">
+                <button type="button" onclick="closeCourseModal();" class="px-4 py-2 border rounded bg-white hover:bg-slate-50 cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] cursor-pointer">Save Course catalog</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Enroll Student Modal -->
+    <div id="enroll_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+        <form action="actions.php?action=add_enrollment" method="POST" class="bg-white border border-[#E2E8F0] rounded-xl w-full max-w-md shadow-lg relative max-h-[85vh] flex flex-col overflow-hidden animate-modalContent text-xs font-bold">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0 flex items-center justify-between">
+                <h3 class="text-lg font-extrabold text-[#0F172A]">Enroll Student Scholar</h3>
+                <button type="button" onclick="closeEnrollStudentModal();" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4 text-left">
+                <div>
+                    <label class="block text-slate-500 mb-1">Select Student Scholar</label>
+                    <select name="student_id" class="w-full border p-2.5 rounded bg-white text-slate-700 text-xs">
+                        <?php foreach ($allStudents as $st): ?>
+                            <option value="<?php echo $st['id']; ?>"><?php echo htmlspecialchars($st['name']); ?> (<?php echo htmlspecialchars($st['roll_no']); ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Select course catalog</label>
+                    <select name="course_id" class="w-full border p-2.5 rounded bg-white text-slate-700 text-xs">
+                        <?php foreach ($allCourses as $c): ?>
+                            <option value="<?php echo $c['id']; ?>"><?php echo htmlspecialchars($c['code']); ?> - <?php echo htmlspecialchars($c['title']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex justify-end gap-2 flex-shrink-0">
+                <button type="button" onclick="closeEnrollStudentModal();" class="px-4 py-2 border rounded bg-white hover:bg-slate-50 cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-[#0F172A] text-white rounded hover:bg-[#1E293B] cursor-pointer">Confirm Enrollment</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function openAddCourseModal() {
+            document.getElementById('course_form').action = "actions.php?action=add_course";
+            document.getElementById('crs_id').value = "";
+            document.getElementById('crs_title').value = "";
+            document.getElementById('crs_code').value = "";
+            document.getElementById('crs_credits').value = "3";
+            document.getElementById('crs_sem').value = "4";
+            document.getElementById('crs_desc').value = "";
+            document.getElementById('crs_status_block').classList.add('hidden');
+            document.getElementById('course_modal_title').innerText = "Create Course catalog";
+            document.getElementById('course_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function openEditCourseModal(id, title, code, deptId, teacherId, credits, sem, desc, status) {
+            document.getElementById('course_form').action = "actions.php?action=edit_course";
+            document.getElementById('crs_id').value = id;
+            document.getElementById('crs_title').value = title;
+            document.getElementById('crs_code').value = code;
+            document.getElementById('crs_dept').value = deptId;
+            document.getElementById('crs_teacher').value = teacherId;
+            document.getElementById('crs_credits').value = credits;
+            document.getElementById('crs_sem').value = sem;
+            document.getElementById('crs_desc').value = desc;
+            document.getElementById('crs_status').value = status;
+            document.getElementById('crs_status_block').classList.remove('hidden');
+            document.getElementById('course_modal_title').innerText = "Modify Course Catalog details";
+            document.getElementById('course_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function closeCourseModal() {
+            document.getElementById('course_modal').classList.add('hidden');
+            unlockBackgroundScroll();
+        }
+        function openEnrollStudentModal() {
+            document.getElementById('enroll_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function closeEnrollStudentModal() {
+            document.getElementById('enroll_modal').classList.add('hidden');
+            unlockBackgroundScroll();
+        }
+    </script>
 
 <?php elseif ($currentTab === 'placements'): ?>
     <!-- ADMIN PLACEMENTS CELL -->

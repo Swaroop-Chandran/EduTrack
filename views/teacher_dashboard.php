@@ -153,77 +153,84 @@ if (!empty($teacherCourseIds)) {
                     </div>
                 </div>
             </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <!-- Grading script Modal Overlay -->
-        <div id="grading_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
-            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-lg relative animate-modalContent space-y-4">
-                <button onclick="closeGradingModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-                <div class="flex items-center gap-2 pb-2 border-b border-slate-50">
+    <!-- Grading script Modal Overlay -->
+    <div id="grading_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+        <form action="actions.php?action=evaluate_submission" method="POST" class="bg-white border border-[#E2E8F0] rounded-xl w-full max-w-lg shadow-lg relative max-h-[85vh] flex flex-col overflow-hidden animate-modalContent text-xs font-bold">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-[#E2E8F0] flex-shrink-0 flex items-center justify-between">
+                <div class="flex items-center gap-2">
                     <i data-lucide="award" class="w-5 h-5 text-[#2563EB]"></i>
                     <h3 class="text-base font-extrabold text-[#0F172A] tracking-tight">Evaluate Script Marks</h3>
                 </div>
-
-                <form action="actions.php?action=evaluate_submission" method="POST" class="space-y-4">
-                    <input type="hidden" name="submission_id" id="modal_sub_id" value="" />
-                    <div class="text-xs text-slate-500 font-semibold space-y-1">
-                        <div>Student: <span id="modal_student_name" class="text-slate-800 font-bold"></span></div>
-                        <div>Assignment: <span id="modal_asg_title" class="text-slate-800 font-bold"></span></div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase font-mono mb-1.5">Score Points Obtained (Max: <span id="modal_max_marks"></span>)</label>
-                        <input
-                            type="number"
-                            name="marks_obtained"
-                            id="modal_marks_input"
-                            class="w-full border border-slate-200 p-2 rounded focus:ring-1 focus:ring-blue-500 text-xs"
-                            min="0"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase font-mono mb-1.5">Instructor Tutors Review comments</label>
-                        <textarea
-                            name="feedback"
-                            id="modal_feedback_input"
-                            rows="4"
-                            class="w-full border border-slate-200 p-2 rounded focus:ring-1 focus:ring-blue-500 text-xs"
-                            required
-                        ></textarea>
-                    </div>
-
-                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 text-xs font-bold">
-                        <button type="button" onclick="closeGradingModal();" class="px-4 py-2 border rounded font-medium hover:bg-slate-50">
-                            Close view
-                        </button>
-                        <button type="submit" class="px-4 py-2 bg-[#10B981] text-white rounded hover:bg-[#059669]">
-                            Publish assessment Evaluation
-                        </button>
-                    </div>
-                </form>
+                <button type="button" onclick="closeGradingModal();" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
-        </div>
-        <script>
-            function openGradingModal(subId, maxMarks, studentName, asgTitle) {
-                document.getElementById('modal_sub_id').value = subId;
-                document.getElementById('modal_max_marks').innerText = maxMarks;
-                document.getElementById('modal_student_name').innerText = studentName;
-                document.getElementById('modal_asg_title').innerText = asgTitle;
-                document.getElementById('modal_marks_input').max = maxMarks;
-                document.getElementById('modal_marks_input').value = Math.round(maxMarks * 0.9);
-                document.getElementById('modal_feedback_input').value = "Well developed structure, codes compilation is solid and requirements were met fully.";
-                
-                document.getElementById('grading_modal').classList.remove('hidden');
-            }
-            function closeGradingModal() {
-                document.getElementById('grading_modal').classList.add('hidden');
-            }
-        </script>
+
+            <!-- Modal Body (scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-4 text-left">
+                <input type="hidden" name="submission_id" id="modal_sub_id" value="" />
+                <div class="text-slate-500 font-semibold space-y-1">
+                    <div>Student: <span id="modal_student_name" class="text-slate-800 font-bold"></span></div>
+                    <div>Assignment: <span id="modal_asg_title" class="text-slate-800 font-bold"></span></div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 uppercase font-mono mb-1.5">Score Points Obtained (Max: <span id="modal_max_marks"></span>)</label>
+                    <input
+                        type="number"
+                        name="marks_obtained"
+                        id="modal_marks_input"
+                        class="w-full border border-slate-200 p-2 rounded focus:ring-1 focus:ring-blue-500 text-xs"
+                        min="0"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 uppercase font-mono mb-1.5">Instructor Tutors Review comments</label>
+                    <textarea
+                        name="feedback"
+                        id="modal_feedback_input"
+                        rows="4"
+                        class="w-full border border-slate-200 p-2 rounded focus:ring-1 focus:ring-blue-500 text-xs"
+                        required
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex justify-end gap-2 flex-shrink-0">
+                <button type="button" onclick="closeGradingModal();" class="px-4 py-2 border rounded bg-white hover:bg-slate-50 cursor-pointer">Close view</button>
+                <button type="submit" class="px-4 py-2 bg-[#10B981] text-white rounded hover:bg-[#059669] cursor-pointer">Publish assessment Evaluation</button>
+            </div>
+        </form>
     </div>
+
+    <script>
+        function openGradingModal(subId, maxMarks, studentName, asgTitle) {
+            document.getElementById('modal_sub_id').value = subId;
+            document.getElementById('modal_max_marks').innerText = maxMarks;
+            document.getElementById('modal_student_name').innerText = studentName;
+            document.getElementById('modal_asg_title').innerText = asgTitle;
+            document.getElementById('modal_marks_input').max = maxMarks;
+            document.getElementById('modal_marks_input').value = Math.round(maxMarks * 0.9);
+            document.getElementById('modal_feedback_input').value = "Well developed structure, codes compilation is solid and requirements were met fully.";
+            
+            document.getElementById('grading_modal').classList.remove('hidden');
+            lockBackgroundScroll();
+        }
+        function closeGradingModal() {
+            document.getElementById('grading_modal').classList.add('hidden');
+            unlockBackgroundScroll();
+        }
+    </script>
 
 <?php elseif ($currentTab === 'courses'): ?>
     <!-- TEACHER MY COURSES TAB -->
