@@ -47,7 +47,7 @@ function getNotifIcon(string $type): string {
             <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
         <div class="hidden sm:flex items-center gap-2">
-            <i data-lucide="graduation-cap" class="w-5 h-5 text-[#1D4ED8]"></i>
+            <i data-lucide="graduation-cap" class="w-5 h-5 text-primary"></i>
             <h2 class="text-sm font-bold text-[#0F172A] tracking-tight"><?php echo htmlspecialchars($pageTitle); ?></h2>
         </div>
     </div>
@@ -56,7 +56,7 @@ function getNotifIcon(string $type): string {
     <div class="flex items-center gap-3">
         <!-- Dynamic System Clock Display -->
         <div class="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-[#F1F5F9] rounded-full text-xs text-[#64748B] font-semibold border border-[#E2E8F0]">
-            <i data-lucide="clock" class="w-3.5 h-3.5 text-[#1D4ED8]"></i>
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-primary"></i>
             <span id="system_utc_clock">UTC <?php echo date('Y-m-d'); ?></span>
         </div>
 
@@ -77,7 +77,7 @@ function getNotifIcon(string $type): string {
                     <span class="font-bold text-xs text-[#0F172A] uppercase tracking-wider">Notifications Center</span>
                     <?php if (count($myNotifications) > 0): ?>
                         <form action="actions.php?action=clear_notifications" method="POST" class="inline">
-                            <button type="submit" class="text-[10px] text-[#1D4ED8] font-bold hover:underline">Clear All</button>
+                            <button type="submit" class="text-[10px] text-primary font-bold hover:underline">Clear All</button>
                         </form>
                     <?php endif; ?>
                 </div>
@@ -111,7 +111,7 @@ function getNotifIcon(string $type): string {
                                     </span>
                                 </div>
                                 <?php if ($isUnread): ?>
-                                    <span class="w-2 h-2 rounded-full bg-[#1D4ED8] mt-2 shrink-0"></span>
+                                    <span class="w-2 h-2 rounded-full bg-primary mt-2 shrink-0"></span>
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>

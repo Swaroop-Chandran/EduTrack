@@ -98,15 +98,15 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
 
 <?php if ($currentTab === 'dashboard'): ?>
     <div class="space-y-6 animate-fadeIn text-left">
-        <!-- Greeting Title -->
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E2E8F0] pb-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-[#0F172A] tracking-tight">
-                    Good morning, <?php echo htmlspecialchars($currentUser['name']); ?> 👋
+                <h1 class="text-2xl font-bold text-[#0F172A] tracking-tight">
+                    Student Dashboard
                 </h1>
-                <p class="text-[#64748B] text-sm mt-1">Here is an overview of your academic curriculum progress today.</p>
+                <p class="text-[#64748B] text-xs mt-1">Overview of your academic profile and progress</p>
             </div>
-            <a href="?tab=exams" class="px-4 py-2 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform duration-75 active:scale-95">
+            <a href="?tab=exams" class="px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform duration-75 active:scale-95">
                 <i data-lucide="calendar-days" class="w-4 h-4"></i>
                 <span>View Exam Schedules</span>
             </a>
@@ -131,7 +131,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm space-y-4">
                     <div class="flex items-center justify-between pb-2 border-b border-[#E2E8F0]">
                         <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider">Continue Learning</h3>
-                        <a href="?tab=courses" class="text-xs font-bold text-[#1D4ED8] hover:underline">View All Active</a>
+                        <a href="?tab=courses" class="text-xs font-bold text-[#2563EB] hover:underline">View All Active</a>
                     </div>
                     <div class="space-y-4">
                         <?php 
@@ -139,14 +139,14 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                         foreach ($sliceCourses as $course): 
                             $progressSeed = $course['id'] === 1 ? 65 : ($course['id'] === 2 ? 85 : ($course['id'] === 3 ? 12 : 30));
                         ?>
-                            <a href="?tab=courses" class="bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#1D4ED8]/40 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer transition-colors group block">
+                            <a href="?tab=courses" class="bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#2563EB]/40 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer transition-colors group block">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-[#1D4ED8]/10 text-[#1D4ED8] rounded-lg flex items-center justify-center shrink-0">
+                                    <div class="w-12 h-12 bg-[#2563EB]/10 text-[#2563EB] rounded-lg flex items-center justify-center shrink-0">
                                         <i data-lucide="book-marked" class="w-6 h-6"></i>
                                     </div>
                                     <div>
                                         <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider font-mono"><?php echo htmlspecialchars($course['code']); ?></span>
-                                        <h4 class="text-sm font-bold text-[#0F172A] group-hover:text-[#1D4ED8] transition-colors mt-0.5"><?php echo htmlspecialchars($course['title']); ?></h4>
+                                        <h4 class="text-sm font-bold text-[#0F172A] group-hover:text-[#2563EB] transition-colors mt-0.5"><?php echo htmlspecialchars($course['title']); ?></h4>
                                         <p class="text-xs text-[#64748B] mt-1 italic">Credits: <?php echo $course['credits']; ?> • Sem: <?php echo $course['semester']; ?></p>
                                     </div>
                                 </div>
@@ -154,10 +154,10 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                                 <div class="w-full sm:w-48 space-y-1.5 shrink-0">
                                     <div class="flex justify-between items-center text-[10px] font-bold text-[#64748B]">
                                         <span>Course Progress</span>
-                                        <span class="text-[#1D4ED8]"><?php echo $progressSeed; ?>%</span>
+                                        <span class="text-[#2563EB]"><?php echo $progressSeed; ?>%</span>
                                     </div>
                                     <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                                        <div class="bg-[#1D4ED8] h-1.5 rounded-full" style="width: <?php echo $progressSeed; ?>%;"></div>
+                                        <div class="bg-[#2563EB] h-1.5 rounded-full" style="width: <?php echo $progressSeed; ?>%;"></div>
                                     </div>
                                 </div>
                             </a>
@@ -169,7 +169,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm space-y-4">
                     <div class="flex items-center justify-between pb-2 border-b border-[#E2E8F0]">
                         <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider">Recent Semester Results</h3>
-                        <a href="?tab=results" class="text-xs font-bold text-[#1D4ED8] hover:underline">Detailed Transcripts</a>
+                        <a href="?tab=results" class="text-xs font-bold text-[#2563EB] hover:underline">Detailed Transcripts</a>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs border-collapse">
@@ -211,7 +211,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <!-- Upcoming Deadlines Widget -->
                 <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm space-y-4">
                     <div class="flex items-center gap-2 pb-2 border-b border-[#E2E8F0]">
-                        <i data-lucide="clock" class="w-4 h-4 text-[#1D4ED8]"></i>
+                        <i data-lucide="clock" class="w-4 h-4 text-[#2563EB]"></i>
                         <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider">Upcoming Tasks</h3>
                     </div>
                     <div class="space-y-4">
@@ -220,7 +220,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                         foreach ($slicePending as $asg): 
                             $isDueToday = ($asg['id'] === 1); // Mock today check
                         ?>
-                            <div class="p-3 border border-[#E2E8F0] rounded-xl hover:border-[#1D4ED8]/30 transition-colors bg-white">
+                            <div class="p-3 border border-[#E2E8F0] rounded-xl hover:border-[#2563EB]/30 transition-colors bg-white">
                                 <div class="flex justify-between items-start gap-2 mb-1.5">
                                     <h4 class="text-xs font-bold text-[#0F172A] line-clamp-1"><?php echo htmlspecialchars($asg['title']); ?></h4>
                                     <?php if ($isDueToday): ?>
@@ -234,7 +234,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                                     <span class="text-[10px] font-mono bg-[#F1F5F9] text-[#64748B] rounded px-1.5 py-0.5 border border-[#E2E8F0]">
                                         <?php echo htmlspecialchars($asg['course_code']); ?>
                                     </span>
-                                    <a href="?tab=submit_assignment&assignment_id=<?php echo $asg['id']; ?>" class="text-[10px] font-extrabold text-[#1D4ED8] hover:underline">Submit Deliverable →</a>
+                                    <a href="?tab=submit_assignment&assignment_id=<?php echo $asg['id']; ?>" class="text-[10px] font-extrabold text-[#2563EB] hover:underline">Submit Deliverable →</a>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -265,7 +265,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                         <div class="p-2.5 bg-white/5 border border-white/10 rounded-lg text-center text-xs font-mono font-bold tracking-widest text-blue-400">
                             Date: <?php echo $nextExam['exam_date']; ?> at <?php echo date('h:i A', strtotime($nextExam['start_time'])); ?>
                         </div>
-                        <a href="?tab=exams" class="w-full py-2 bg-[#1C2541] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg transition-colors border border-white/10 block text-center">
+                        <a href="?tab=exams" class="w-full py-2 bg-[#0F172A] hover:bg-[#2563EB] text-white text-xs font-bold rounded-lg transition-colors border border-white/10 block text-center">
                             View Directions & Rules
                         </a>
                     </div>
@@ -303,7 +303,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
             <div class="flex items-center gap-3">
                 <div class="flex items-center border border-[#E2E8F0] rounded-lg p-1 bg-white shadow-sm">
                     <?php foreach (['all', 'active', 'completed'] as $filter): ?>
-                        <a href="?tab=courses&filter=<?php echo $filter; ?>&search=<?php echo urlencode($courseSearch); ?>" class="px-3 py-1 text-xs font-bold rounded-md transition-all <?php echo $activeCourseFilter === $filter ? 'bg-[#1D4ED8] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
+                        <a href="?tab=courses&filter=<?php echo $filter; ?>&search=<?php echo urlencode($courseSearch); ?>" class="px-3 py-1 text-xs font-bold rounded-md transition-all <?php echo $activeCourseFilter === $filter ? 'bg-[#2563EB] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
                             <?php echo strtoupper($filter); ?>
                         </a>
                     <?php endforeach; ?>
@@ -323,7 +323,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 name="search"
                 value="<?php echo htmlspecialchars($courseSearch); ?>"
                 placeholder="Search enrolled course name or department code..."
-                class="w-full pl-9 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent shadow-sm"
+                class="w-full pl-9 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent shadow-sm"
                 onchange="this.form.submit();"
             />
         </form>
@@ -334,10 +334,10 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 $progressSeed = $course['id'] === 1 ? 65 : ($course['id'] === 2 ? 85 : ($course['id'] === 3 ? 12 : 30));
             ?>
                 <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow relative">
-                    <div class="h-2 bg-gradient-to-r from-[#1D4ED8] to-blue-400 w-full"></div>
+                    <div class="h-2 bg-gradient-to-r from-[#2563EB] to-blue-400 w-full"></div>
                     <div class="p-6 flex flex-col flex-1 space-y-4">
                         <div class="flex justify-between items-start">
-                            <div class="w-10 h-10 bg-[#1D4ED8]/10 text-[#1D4ED8] rounded-xl flex items-center justify-center">
+                            <div class="w-10 h-10 bg-[#2563EB]/10 text-[#2563EB] rounded-xl flex items-center justify-center">
                                 <i data-lucide="book-open" class="w-5 h-5"></i>
                             </div>
                             <?php echo renderBadge($course['enrollment_status'] === 'active' ? 'In Progress' : 'Completed', $course['enrollment_status'] === 'active' ? 'warning' : 'success'); ?>
@@ -353,10 +353,10 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                         <div class="mt-auto pt-4 border-t border-slate-50 space-y-1.5">
                             <div class="flex justify-between items-center text-[10px] font-bold text-[#64748B]">
                                 <span>Curriculum Progress</span>
-                                <span class="text-[#1D4ED8] font-black"><?php echo $progressSeed; ?>%</span>
+                                <span class="text-[#2563EB] font-black"><?php echo $progressSeed; ?>%</span>
                             </div>
                             <div class="w-full bg-[#F1F5F9] h-1.5 rounded-full overflow-hidden">
-                                <div class="bg-[#1D4ED8] h-1.5 rounded-full" style="width: <?php echo $progressSeed; ?>%;"></div>
+                                <div class="bg-[#2563EB] h-1.5 rounded-full" style="width: <?php echo $progressSeed; ?>%;"></div>
                             </div>
                         </div>
                     </div>
@@ -390,13 +390,13 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
             
             <!-- Filters -->
             <div class="flex border border-[#E2E8F0] bg-white rounded-lg p-1 shadow-sm font-bold text-xs">
-                <a href="?tab=assignments&sub_tab=pending" class="px-4 py-1.5 rounded-md transition-all <?php echo $activeAsgTab === 'pending' ? 'bg-[#1D4ED8] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
+                <a href="?tab=assignments&sub_tab=pending" class="px-4 py-1.5 rounded-md transition-all <?php echo $activeAsgTab === 'pending' ? 'bg-[#2563EB] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
                     PENDING TASKS (<?php echo count($pendingAssignments); ?>)
                 </a>
-                <a href="?tab=assignments&sub_tab=submitted" class="px-4 py-1.5 rounded-md transition-all <?php echo $activeAsgTab === 'submitted' ? 'bg-[#1D4ED8] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
+                <a href="?tab=assignments&sub_tab=submitted" class="px-4 py-1.5 rounded-md transition-all <?php echo $activeAsgTab === 'submitted' ? 'bg-[#2563EB] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
                     SUBMITTED (<?php echo count($subSubmitted); ?>)
                 </a>
-                <a href="?tab=assignments&sub_tab=graded" class="px-4 py-1.5 rounded-md transition-all <?php echo $activeAsgTab === 'graded' ? 'bg-[#1D4ED8] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
+                <a href="?tab=assignments&sub_tab=graded" class="px-4 py-1.5 rounded-md transition-all <?php echo $activeAsgTab === 'graded' ? 'bg-[#2563EB] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
                     GRADED FEEDBACK (<?php echo count($subGraded); ?>)
                 </a>
             </div>
@@ -423,7 +423,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                             <span class="text-xs font-bold text-slate-500 font-mono bg-slate-50 p-2.5 rounded-lg border border-[#E2E8F0] block text-center md:text-right md:w-32">
                                 Max Marks: <?php echo $asg['max_marks']; ?>
                             </span>
-                            <a href="?tab=submit_assignment&assignment_id=<?php echo $asg['id']; ?>" class="py-2.5 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm text-center cursor-pointer md:w-32 transform active:scale-95 transition-transform block">
+                            <a href="?tab=submit_assignment&assignment_id=<?php echo $asg['id']; ?>" class="py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm text-center cursor-pointer md:w-32 transform active:scale-95 transition-transform block">
                                 File Submit
                             </a>
                         </div>
@@ -524,13 +524,13 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
             <div class="text-center p-6 space-y-4">
                 <i data-lucide="link-2-off" class="w-12 h-12 text-red-400 mx-auto"></i>
                 <p class="font-bold text-slate-700">Invalid Deliverable Reference</p>
-                <a href="?tab=assignments" class="py-2 px-4 bg-[#1D4ED8] text-white rounded-lg text-xs font-bold inline-block">Back to Registry</a>
+                <a href="?tab=assignments" class="py-2 px-4 bg-[#2563EB] text-white rounded-lg text-xs font-bold inline-block">Back to Registry</a>
             </div>
         <?php else: ?>
             <form action="actions.php?action=submit_assignment" method="POST" enctype="multipart/form-data" class="space-y-6">
                 <input type="hidden" name="assignment_id" value="<?php echo $asgId; ?>" />
                 <div>
-                    <a href="?tab=assignments" class="flex items-center gap-1 text-xs text-[#1D4ED8] hover:underline mb-4 font-bold">
+                    <a href="?tab=assignments" class="flex items-center gap-1 text-xs text-[#2563EB] hover:underline mb-4 font-bold">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         <span>Back to Deliverables</span>
                     </a>
@@ -552,7 +552,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                             name="text_submission"
                             placeholder="Enter details about your homework algorithms, assumptions or design structure writeups here..."
                             rows="5"
-                            class="w-full bg-[#fdfdfd] border border-[#E2E8F0] focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent rounded-xl p-3 text-xs text-[#0F172A] focus:outline-none transition-all font-mono"
+                            class="w-full bg-[#fdfdfd] border border-[#E2E8F0] focus:ring-2 focus:ring-[#2563EB] focus:border-transparent rounded-xl p-3 text-xs text-[#0F172A] focus:outline-none transition-all font-mono"
                         ></textarea>
                     </div>
 
@@ -561,7 +561,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                             Attach deliverable file (Max 10MB)
                         </label>
                         
-                        <div class="border-2 border-dashed border-[#E2E8F0] hover:border-[#1D4ED8]/60 bg-[#F8FAFC] rounded-xl p-8 text-center cursor-pointer transition-all relative">
+                        <div class="border-2 border-dashed border-[#E2E8F0] hover:border-[#2563EB]/60 bg-[#F8FAFC] rounded-xl p-8 text-center cursor-pointer transition-all relative">
                             <input
                                 type="file"
                                 name="submission_file"
@@ -587,7 +587,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                     </a>
                     <button
                         type="submit"
-                        class="py-2.5 px-5 bg-[#1C2541] hover:bg-[#1D4ED8] text-white rounded-lg shadow-sm"
+                        class="py-2.5 px-5 bg-[#0F172A] hover:bg-[#2563EB] text-white rounded-lg shadow-sm"
                     >
                         Post Submission File
                     </button>
@@ -648,15 +648,15 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b pb-2">Academic Integrity & Conduct Rules</h3>
                 <ul class="space-y-3 text-xs text-[#64748B] leading-relaxed">
                     <li class="flex items-start gap-2.5">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] mt-1.5 shrink-0"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mt-1.5 shrink-0"></div>
                         <p>Scholars must display official identification card badges before entering venues.</p>
                     </li>
                     <li class="flex items-start gap-2.5">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] mt-1.5 shrink-0"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mt-1.5 shrink-0"></div>
                         <p>Any electronic devices, smart devices, watches, calculators, or unauthorized scripts must be surrendered to invigilators before entry.</p>
                     </li>
                     <li class="flex items-start gap-2.5">
-                        <div class="w-1.5 h-1.5 rounded-full bg-[#1D4ED8] mt-1.5 shrink-0"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mt-1.5 shrink-0"></div>
                         <p>Late arrivals beyond 15 minutes of scheduled times will disqualify candidates from script collection.</p>
                     </li>
                 </ul>
@@ -681,7 +681,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <label class="text-xs font-bold text-slate-500 font-mono">SEMESTER:</label>
                 <div class="flex border border-[#E2E8F0] bg-white rounded-lg p-1 shadow-sm font-bold text-xs">
                     <?php foreach ([1, 2, 3, 4] as $sem): ?>
-                        <a href="?tab=results&sem=<?php echo $sem; ?>" class="px-3 py-1 rounded-md <?php echo $selectedSem === $sem ? 'bg-[#1D4ED8] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
+                        <a href="?tab=results&sem=<?php echo $sem; ?>" class="px-3 py-1 rounded-md <?php echo $selectedSem === $sem ? 'bg-[#2563EB] text-white' : 'text-[#64748B] hover:text-[#0F172A]'; ?>">
                             Sem <?php echo $sem; ?>
                         </a>
                     <?php endforeach; ?>
@@ -709,7 +709,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                                 <td class="p-4 font-sans text-slate-800 font-semibold"><?php echo htmlspecialchars($res['course_title']); ?></td>
                                 <td class="p-4 text-center"><?php echo $res['internal_marks']; ?> / 30</td>
                                 <td class="p-4 text-center"><?php echo $res['external_marks']; ?> / 70</td>
-                                <td class="p-4 text-center text-[#1D4ED8] font-black"><?php echo $res['total_marks']; ?> / 100</td>
+                                <td class="p-4 text-center text-[#2563EB] font-black"><?php echo $res['total_marks']; ?> / 100</td>
                                 <td class="p-4 text-right">
                                     <?php echo renderBadge($res['grade'], $res['status'] === 'pass' ? 'success' : 'danger'); ?>
                                 </td>
@@ -762,7 +762,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                                     <td class="p-4 font-bold"><?php echo htmlspecialchars($course['code']); ?></td>
                                     <td class="p-4 font-sans text-slate-800 font-semibold"><?php echo htmlspecialchars($course['title']); ?></td>
                                     <td class="p-4 text-center"><?php echo $cPresent; ?> / <?php echo $cTotal; ?> classes</td>
-                                    <td class="p-4 text-center text-[#1D4ED8] font-black"><?php echo $cPercent; ?>%</td>
+                                    <td class="p-4 text-center text-[#2563EB] font-black"><?php echo $cPercent; ?>%</td>
                                     <td class="p-4 text-right">
                                         <?php if ($statusSafety === 'safe'): ?>
                                             <?php echo renderBadge("Safe Cutoff", "success"); ?>
@@ -781,7 +781,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
 
             <!-- Attendance stats -->
             <div class="lg:col-span-4 bg-[#0F172A] text-white rounded-xl p-6 shadow-md border border-white/10 space-y-4">
-                <h3 class="text-xs font-black uppercase tracking-widest text-[#1D4ED8]">Institutional Attendance Audits</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-[#2563EB]">Institutional Attendance Audits</h3>
                 <p class="text-xs text-slate-400 leading-relaxed">
                     EduTrack LMS regulations mandate a minimum of <strong>85% attendance turnout rate</strong> for eligibility in end-semester theory examinations.
                 </p>
@@ -839,7 +839,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                         <?php elseif (!$isEligible): ?>
                             <span class="text-xs font-bold py-1.5 px-3 rounded bg-red-50 text-red-700 border border-red-100" title="CGPA requirements not met">Ineligible</span>
                         <?php else: ?>
-                            <a href="actions.php?action=apply_placement&placement_id=<?php echo $job['id']; ?>" class="py-1.5 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded shadow-sm cursor-pointer transition-transform active:scale-95">
+                            <a href="actions.php?action=apply_placement&placement_id=<?php echo $job['id']; ?>" class="py-1.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded shadow-sm cursor-pointer transition-transform active:scale-95">
                                 Apply Now
                             </a>
                         <?php endif; ?>
@@ -881,9 +881,9 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
             <div class="flex items-center gap-3">
                 <div class="text-center px-4 py-2 bg-slate-50 border border-slate-100 rounded-lg shrink-0">
                     <span class="text-xs text-slate-400 block font-bold uppercase tracking-wider">CGPA</span>
-                    <span class="text-lg font-black text-[#1D4ED8] font-mono"><?php echo number_format($cgpaValue, 2); ?></span>
+                    <span class="text-lg font-black text-[#2563EB] font-mono"><?php echo number_format($cgpaValue, 2); ?></span>
                 </div>
-                <button type="button" id="edit_profile_btn" onclick="toggleEditMode(true);" class="py-2.5 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer transition-transform active:scale-95 flex items-center gap-1.5">
+                <button type="button" id="edit_profile_btn" onclick="toggleEditMode(true);" class="py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer transition-transform active:scale-95 flex items-center gap-1.5">
                     <i data-lucide="edit-3" class="w-4 h-4"></i>
                     <span>Edit Profile Details</span>
                 </button>
@@ -895,7 +895,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
             <!-- Personal Info Card -->
             <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
                 <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-[#E2E8F0] pb-2 flex items-center gap-2">
-                    <i data-lucide="user" class="w-4 h-4 text-[#1D4ED8]"></i>
+                    <i data-lucide="user" class="w-4 h-4 text-[#2563EB]"></i>
                     <span>Personal Information</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -945,7 +945,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
             <!-- Parent Info Card -->
             <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
                 <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-[#E2E8F0] pb-2 flex items-center gap-2">
-                    <i data-lucide="users" class="w-4 h-4 text-[#1D4ED8]"></i>
+                    <i data-lucide="users" class="w-4 h-4 text-[#2563EB]"></i>
                     <span>Parent Information</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1008,7 +1008,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
             <!-- Address Info Card -->
             <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
                 <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-[#E2E8F0] pb-2 flex items-center gap-2">
-                    <i data-lucide="map-pin" class="w-4 h-4 text-[#1D4ED8]"></i>
+                    <i data-lucide="map-pin" class="w-4 h-4 text-[#2563EB]"></i>
                     <span>Address Information</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1026,7 +1026,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
             <!-- Documents Card -->
             <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
                 <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-[#E2E8F0] pb-2 flex items-center gap-2">
-                    <i data-lucide="file-text" class="w-4 h-4 text-[#1D4ED8]"></i>
+                    <i data-lucide="file-text" class="w-4 h-4 text-[#2563EB]"></i>
                     <span>Documents Upload status</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1054,10 +1054,10 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                             </div>
                             <?php if ($hasDoc): ?>
                                 <div class="flex items-center gap-2 shrink-0">
-                                    <a href="uploads/documents/<?php echo htmlspecialchars($docsMap[$key]); ?>" target="_blank" class="p-1.5 border border-[#E2E8F0] hover:border-[#1D4ED8] bg-white rounded-lg text-[#64748B] hover:text-[#1D4ED8] transition-colors" title="View Document">
+                                    <a href="uploads/documents/<?php echo htmlspecialchars($docsMap[$key]); ?>" target="_blank" class="p-1.5 border border-[#E2E8F0] hover:border-[#2563EB] bg-white rounded-lg text-[#64748B] hover:text-[#2563EB] transition-colors" title="View Document">
                                         <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                     </a>
-                                    <a href="uploads/documents/<?php echo htmlspecialchars($docsMap[$key]); ?>" download="<?php echo htmlspecialchars($key . '_' . $currentUser['id']); ?>" class="p-1.5 border border-[#E2E8F0] hover:border-[#1D4ED8] bg-white rounded-lg text-[#64748B] hover:text-[#1D4ED8] transition-colors" title="Download Document">
+                                    <a href="uploads/documents/<?php echo htmlspecialchars($docsMap[$key]); ?>" download="<?php echo htmlspecialchars($key . '_' . $currentUser['id']); ?>" class="p-1.5 border border-[#E2E8F0] hover:border-[#2563EB] bg-white rounded-lg text-[#64748B] hover:text-[#2563EB] transition-colors" title="Download Document">
                                         <i data-lucide="download" class="w-3.5 h-3.5"></i>
                                     </a>
                                 </div>
@@ -1083,17 +1083,17 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <!-- Personal Info Inputs Card -->
                 <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
                     <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-[#E2E8F0] pb-2 flex items-center gap-2">
-                        <i data-lucide="user" class="w-4 h-4 text-[#1D4ED8]"></i>
+                        <i data-lucide="user" class="w-4 h-4 text-[#2563EB]"></i>
                         <span>Personal Information</span>
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div>
                             <label for="edit_name" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Full Name *</label>
-                            <input type="text" name="name" id="edit_name" value="<?php echo htmlspecialchars($currentUser['name']); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all" required />
+                            <input type="text" name="name" id="edit_name" value="<?php echo htmlspecialchars($currentUser['name']); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all" required />
                         </div>
                         <div>
                             <label for="edit_gender" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Gender</label>
-                            <select name="gender" id="edit_gender" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all">
+                            <select name="gender" id="edit_gender" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all">
                                 <option value="">Select Gender</option>
                                 <option value="Male" <?php echo ($studentProfile['gender'] ?? '') === 'Male' ? 'selected' : ''; ?>>Male</option>
                                 <option value="Female" <?php echo ($studentProfile['gender'] ?? '') === 'Female' ? 'selected' : ''; ?>>Female</option>
@@ -1103,31 +1103,31 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                         </div>
                         <div>
                             <label for="edit_dob" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Date of Birth</label>
-                            <input type="date" name="dob" id="edit_dob" value="<?php echo htmlspecialchars($studentProfile['dob'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" />
+                            <input type="date" name="dob" id="edit_dob" value="<?php echo htmlspecialchars($studentProfile['dob'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" />
                         </div>
                         <div>
                             <label for="edit_religion" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Religion</label>
-                            <input type="text" name="religion" id="edit_religion" value="<?php echo htmlspecialchars($studentProfile['religion'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all" />
+                            <input type="text" name="religion" id="edit_religion" value="<?php echo htmlspecialchars($studentProfile['religion'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all" />
                         </div>
                         <div>
                             <label for="edit_caste" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Caste</label>
-                            <input type="text" name="caste" id="edit_caste" value="<?php echo htmlspecialchars($studentProfile['caste'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all" />
+                            <input type="text" name="caste" id="edit_caste" value="<?php echo htmlspecialchars($studentProfile['caste'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all" />
                         </div>
                         <div>
                             <label for="edit_nationality" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Nationality</label>
-                            <input type="text" name="nationality" id="edit_nationality" value="<?php echo htmlspecialchars($studentProfile['nationality'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all" />
+                            <input type="text" name="nationality" id="edit_nationality" value="<?php echo htmlspecialchars($studentProfile['nationality'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all" />
                         </div>
                         <div>
                             <label for="edit_blood_group" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Blood Group</label>
-                            <input type="text" name="blood_group" id="edit_blood_group" value="<?php echo htmlspecialchars($studentProfile['blood_group'] ?? ''); ?>" placeholder="e.g. O+, AB-" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" />
+                            <input type="text" name="blood_group" id="edit_blood_group" value="<?php echo htmlspecialchars($studentProfile['blood_group'] ?? ''); ?>" placeholder="e.g. O+, AB-" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" />
                         </div>
                         <div>
                             <label for="edit_aadhaar" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Aadhaar Number</label>
-                            <input type="text" name="aadhaar_number" id="edit_aadhaar" value="<?php echo htmlspecialchars($studentProfile['aadhaar_number'] ?? ''); ?>" placeholder="12 digit Aadhaar" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" />
+                            <input type="text" name="aadhaar_number" id="edit_aadhaar" value="<?php echo htmlspecialchars($studentProfile['aadhaar_number'] ?? ''); ?>" placeholder="12 digit Aadhaar" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" />
                         </div>
                         <div>
                             <label for="edit_phone" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Mobile Phone *</label>
-                            <input type="text" name="phone" id="edit_phone" value="<?php echo htmlspecialchars($currentUser['phone'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" required />
+                            <input type="text" name="phone" id="edit_phone" value="<?php echo htmlspecialchars($currentUser['phone'] ?? ''); ?>" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" required />
                         </div>
                         <div class="md:col-span-2 lg:col-span-3">
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Institutional Email (Read-only)</label>
@@ -1139,58 +1139,58 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <!-- Parent Info Inputs Card -->
                 <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
                     <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-[#E2E8F0] pb-2 flex items-center gap-2">
-                        <i data-lucide="users" class="w-4 h-4 text-[#1D4ED8]"></i>
+                        <i data-lucide="users" class="w-4 h-4 text-[#2563EB]"></i>
                         <span>Parent Information</span>
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Father inputs -->
                         <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                            <h4 class="text-[10px] font-black text-[#1D4ED8] uppercase tracking-wider">Father's Profile Details</h4>
+                            <h4 class="text-[10px] font-black text-[#2563EB] uppercase tracking-wider">Father's Profile Details</h4>
                             
                             <div>
                                 <label for="edit_father_name" class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Father's Name</label>
-                                <input type="text" name="father_name" id="edit_father_name" value="<?php echo htmlspecialchars($studentProfile['father_name'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent transition-all" />
+                                <input type="text" name="father_name" id="edit_father_name" value="<?php echo htmlspecialchars($studentProfile['father_name'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-transparent transition-all" />
                             </div>
                             <div>
                                 <label for="edit_father_phone" class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Father's Phone Number</label>
-                                <input type="text" name="father_phone" id="edit_father_phone" value="<?php echo htmlspecialchars($studentProfile['father_phone'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" />
+                                <input type="text" name="father_phone" id="edit_father_phone" value="<?php echo htmlspecialchars($studentProfile['father_phone'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" />
                             </div>
                             <div>
                                 <label for="edit_father_email" class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Father's Email</label>
-                                <input type="email" name="father_email" id="edit_father_email" value="<?php echo htmlspecialchars($studentProfile['father_email'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" />
+                                <input type="email" name="father_email" id="edit_father_email" value="<?php echo htmlspecialchars($studentProfile['father_email'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" />
                             </div>
                             <div>
                                 <label for="edit_father_occupation" class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Father's Occupation</label>
-                                <input type="text" name="father_occupation" id="edit_father_occupation" value="<?php echo htmlspecialchars($studentProfile['father_occupation'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent transition-all" />
+                                <input type="text" name="father_occupation" id="edit_father_occupation" value="<?php echo htmlspecialchars($studentProfile['father_occupation'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-transparent transition-all" />
                             </div>
                         </div>
 
                         <!-- Mother inputs -->
                         <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                            <h4 class="text-[10px] font-black text-[#1D4ED8] uppercase tracking-wider">Mother's Profile Details</h4>
+                            <h4 class="text-[10px] font-black text-[#2563EB] uppercase tracking-wider">Mother's Profile Details</h4>
                             
                             <div>
                                 <label for="edit_mother_name" class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Mother's Name</label>
-                                <input type="text" name="mother_name" id="edit_mother_name" value="<?php echo htmlspecialchars($studentProfile['mother_name'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent transition-all" />
+                                <input type="text" name="mother_name" id="edit_mother_name" value="<?php echo htmlspecialchars($studentProfile['mother_name'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-transparent transition-all" />
                             </div>
                             <div>
                                 <label for="edit_mother_phone" class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Mother's Phone Number</label>
-                                <input type="text" name="mother_phone" id="edit_mother_phone" value="<?php echo htmlspecialchars($studentProfile['mother_phone'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" />
+                                <input type="text" name="mother_phone" id="edit_mother_phone" value="<?php echo htmlspecialchars($studentProfile['mother_phone'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" />
                             </div>
                             <div>
                                 <label for="edit_mother_email" class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Mother's Email</label>
-                                <input type="email" name="mother_email" id="edit_mother_email" value="<?php echo htmlspecialchars($studentProfile['mother_email'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" />
+                                <input type="email" name="mother_email" id="edit_mother_email" value="<?php echo htmlspecialchars($studentProfile['mother_email'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" />
                             </div>
                             <div>
                                 <label for="edit_mother_occupation" class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Mother's Occupation</label>
-                                <input type="text" name="mother_occupation" id="edit_mother_occupation" value="<?php echo htmlspecialchars($studentProfile['mother_occupation'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent transition-all" />
+                                <input type="text" name="mother_occupation" id="edit_mother_occupation" value="<?php echo htmlspecialchars($studentProfile['mother_occupation'] ?? ''); ?>" class="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-transparent transition-all" />
                             </div>
                         </div>
 
                         <!-- Income input -->
                         <div class="md:col-span-2">
                             <label for="edit_income" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Annual Family Income (in INR)</label>
-                            <input type="number" name="annual_income" id="edit_income" value="<?php echo htmlspecialchars($studentProfile['annual_income'] ?? ''); ?>" placeholder="e.g. 450000" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all font-mono" />
+                            <input type="number" name="annual_income" id="edit_income" value="<?php echo htmlspecialchars($studentProfile['annual_income'] ?? ''); ?>" placeholder="e.g. 450000" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all font-mono" />
                         </div>
                     </div>
                 </div>
@@ -1198,17 +1198,17 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <!-- Address Inputs Card -->
                 <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
                     <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-[#E2E8F0] pb-2 flex items-center gap-2">
-                        <i data-lucide="map-pin" class="w-4 h-4 text-[#1D4ED8]"></i>
+                        <i data-lucide="map-pin" class="w-4 h-4 text-[#2563EB]"></i>
                         <span>Address Information</span>
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="edit_present_address" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Present Address</label>
-                            <textarea name="present_address" id="edit_present_address" rows="3" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all"><?php echo htmlspecialchars($studentProfile['present_address'] ?? ''); ?></textarea>
+                            <textarea name="present_address" id="edit_present_address" rows="3" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all"><?php echo htmlspecialchars($studentProfile['present_address'] ?? ''); ?></textarea>
                         </div>
                         <div>
                             <label for="edit_permanent_address" class="block text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Permanent Address</label>
-                            <textarea name="permanent_address" id="edit_permanent_address" rows="3" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#1D4ED8] focus:border-transparent transition-all"><?php echo htmlspecialchars($studentProfile['address'] ?? ''); ?></textarea>
+                            <textarea name="permanent_address" id="edit_permanent_address" rows="3" class="w-full px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all"><?php echo htmlspecialchars($studentProfile['address'] ?? ''); ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -1216,7 +1216,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                 <!-- Documents Inputs Card -->
                 <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
                     <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-[#E2E8F0] pb-2 flex items-center gap-2">
-                        <i data-lucide="file-text" class="w-4 h-4 text-[#1D4ED8]"></i>
+                        <i data-lucide="file-text" class="w-4 h-4 text-[#2563EB]"></i>
                         <span>Documents Upload (Max 10MB each, PDF/JPG/JPEG/PNG)</span>
                     </h3>
                     
@@ -1228,7 +1228,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                                 <label for="edit_<?php echo $key; ?>" class="block text-xs font-bold text-[#0F172A]"><?php echo $label; ?></label>
                                 
                                 <div class="flex items-center gap-3">
-                                    <input type="file" name="<?php echo $key; ?>" id="edit_<?php echo $key; ?>" data-label="<?php echo $label; ?>" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-blue-50 file:text-[#1D4ED8] hover:file:bg-blue-100 transition-colors" />
+                                    <input type="file" name="<?php echo $key; ?>" id="edit_<?php echo $key; ?>" data-label="<?php echo $label; ?>" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-blue-50 file:text-[#2563EB] hover:file:bg-blue-100 transition-colors" />
                                 </div>
                                 
                                 <?php if ($hasDoc): ?>
@@ -1249,7 +1249,7 @@ $cgpaValue = (float)($studentProfile['cgpa'] ?? 8.4);
                     <button type="button" onclick="toggleEditMode(false);" class="py-2.5 px-5 rounded-lg border border-[#E2E8F0] text-slate-700 hover:bg-slate-50 text-center cursor-pointer transition-colors">
                         Cancel Changes
                     </button>
-                    <button type="submit" class="py-2.5 px-6 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white rounded-lg shadow-sm cursor-pointer transition-colors">
+                    <button type="submit" class="py-2.5 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg shadow-sm cursor-pointer transition-colors">
                         Save Profile Changes
                     </button>
                 </div>

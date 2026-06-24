@@ -57,12 +57,12 @@ $allStudents = $studentsStmt->fetchAll();
 <?php if ($currentTab === 'dashboard'): ?>
     <!-- ADMIN HOME TAB -->
     <div class="space-y-6 animate-fadeIn text-left">
-        <div>
-            <span class="text-xs uppercase font-black tracking-widest text-[#1D4ED8]">Administration Deck</span>
-            <h1 class="text-3xl font-extrabold text-[#0F172A] tracking-tight mt-1">
-                Welcome, Administrator Principal ⚙️
+        <!-- Header -->
+        <div class="border-b border-[#E2E8F0] pb-4">
+            <h1 class="text-2xl font-bold text-[#0F172A] tracking-tight">
+                Admin Dashboard
             </h1>
-            <p class="text-[#64748B] text-xs">Verify enrollment statistics ratios, department boundaries, teachers and placers schedules.</p>
+            <p class="text-[#64748B] text-xs mt-1">Overview of institutional settings, faculty registries, and campus records</p>
         </div>
 
         <!-- KPI metrics -->
@@ -80,7 +80,7 @@ $allStudents = $studentsStmt->fetchAll();
             <div class="lg:col-span-7 bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm space-y-4">
                 <div class="flex justify-between items-center pb-2 border-b border-slate-50">
                     <h3 class="text-sm font-extrabold text-[#0F172A] uppercase tracking-wider">Broadcasted Announcements</h3>
-                    <a href="?tab=announcements" class="text-xs font-bold text-[#1D4ED8] hover:underline">Configure push broadcasts</a>
+                    <a href="?tab=announcements" class="text-xs font-bold text-[#2563EB] hover:underline">Configure push broadcasts</a>
                 </div>
                 
                 <div class="space-y-4 max-h-96 overflow-y-auto pr-1">
@@ -103,7 +103,7 @@ $allStudents = $studentsStmt->fetchAll();
 
             <!-- Right 5Cols: Administrator Shortcuts deck -->
             <div class="lg:col-span-5 bg-[#0F172A] text-white rounded-xl p-6 shadow-md space-y-4">
-                <h3 class="text-xs font-black uppercase tracking-widest text-[#1D4ED8]">Admin Operations Center</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-[#2563EB]">Admin Operations Center</h3>
                 <div class="space-y-3">
                     <a href="?tab=students&open_add=1" class="w-full text-left py-2 px-3 border border-white/5 hover:border-slate-500 rounded-lg text-xs font-semibold flex items-center justify-between block">
                         <span>Initialize New Scholar Admission</span>
@@ -150,7 +150,7 @@ $allStudents = $studentsStmt->fetchAll();
                 <p class="text-[#64748B] text-xs">Acknowledge registered profiles details, search roll, and configure credentials.</p>
             </div>
 
-            <button onclick="openAddStudentModal();" class="py-2.5 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95">
+            <button onclick="openAddStudentModal();" class="py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95">
                 <i data-lucide="user-plus" class="w-4 h-4"></i>
                 <span>Admit Scholar Profile</span>
             </button>
@@ -168,7 +168,7 @@ $allStudents = $studentsStmt->fetchAll();
                     name="search"
                     value="<?php echo htmlspecialchars($studentSearch); ?>"
                     placeholder="Search student scholar name, roll identifier, or email contact..."
-                    class="w-full pl-9 pr-4 py-2 bg-white border border-[#E2E8F0] focus:ring-1 focus:ring-[#1D4ED8] focus:border-transparent rounded-xl text-xs text-[#0F172A]"
+                    class="w-full pl-9 pr-4 py-2 bg-white border border-[#E2E8F0] focus:ring-1 focus:ring-[#2563EB] focus:border-transparent rounded-xl text-xs text-[#0F172A]"
                     onchange="this.form.submit();"
                 />
             </div>
@@ -214,9 +214,9 @@ $allStudents = $studentsStmt->fetchAll();
                                 </td>
                                 <td class="p-4"><?php echo htmlspecialchars($su['roll_no']); ?></td>
                                 <td class="p-4 font-sans text-slate-700"><?php echo htmlspecialchars($su['department_name'] ?? 'Unassigned'); ?></td>
-                                <td class="p-4 text-center text-[#1D4ED8] font-black"><?php echo number_format($su['cgpa'], 2); ?></td>
+                                <td class="p-4 text-center text-[#2563EB] font-black"><?php echo number_format($su['cgpa'], 2); ?></td>
                                 <td class="p-4 text-right space-x-2 font-sans">
-                                    <button onclick="openEditStudentModal(<?php echo $su['id']; ?>, '<?php echo htmlspecialchars(addslashes($su['name'])); ?>', '<?php echo htmlspecialchars(addslashes($su['email'])); ?>', '<?php echo htmlspecialchars($su['phone']); ?>', '<?php echo htmlspecialchars($su['roll_no']); ?>', <?php echo $su['department_id']; ?>, <?php echo $su['year']; ?>, <?php echo $su['semester']; ?>, '<?php echo $su['dob']; ?>', '<?php echo htmlspecialchars(addslashes($su['address'])); ?>');" class="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer">Modify</button>
+                                    <button onclick="openEditStudentModal(<?php echo $su['id']; ?>, '<?php echo htmlspecialchars(addslashes($su['name'])); ?>', '<?php echo htmlspecialchars(addslashes($su['email'])); ?>', '<?php echo htmlspecialchars($su['phone']); ?>', '<?php echo htmlspecialchars($su['roll_no']); ?>', <?php echo $su['department_id']; ?>, <?php echo $su['year']; ?>, <?php echo $su['semester']; ?>, '<?php echo $su['dob']; ?>', '<?php echo htmlspecialchars(addslashes($su['address'])); ?>');" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
                                     <a href="actions.php?action=delete_student&user_id=<?php echo $su['id']; ?>" onclick="return confirm('Confirm physical deletion of student account \'<?php echo htmlspecialchars(addslashes($su['name'])); ?>\' from repository files?')" class="text-xs font-bold text-red-600 hover:underline cursor-pointer">Remove</a>
                                 </td>
                             </tr>
@@ -290,7 +290,7 @@ $allStudents = $studentsStmt->fetchAll();
 
                     <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
                         <button type="button" onclick="closeStudentModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#1D4ED8] text-white rounded hover:bg-[#1E40AF]">Save Scholar Credentials</button>
+                        <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8]">Save Scholar Credentials</button>
                     </div>
                 </form>
             </div>
@@ -359,7 +359,7 @@ $allStudents = $studentsStmt->fetchAll();
                 <p class="text-[#64748B] text-xs">Appoint, evaluate, and adjust instructor information records.</p>
             </div>
 
-            <button onclick="openAddTeacherModal();" class="py-2.5 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95">
+            <button onclick="openAddTeacherModal();" class="py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 <span>Appoint Faculty Professor</span>
             </button>
@@ -406,7 +406,7 @@ $allStudents = $studentsStmt->fetchAll();
                                 <td class="p-4 text-slate-600"><?php echo htmlspecialchars($tu['designation']); ?></td>
                                 <td class="p-4 font-sans text-slate-700"><?php echo htmlspecialchars($tu['department_name'] ?? 'Unassigned'); ?></td>
                                 <td class="p-4 text-right space-x-2 font-sans">
-                                    <button onclick="openEditTeacherModal(<?php echo $tu['id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['name'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['email'])); ?>', '<?php echo htmlspecialchars($tu['phone']); ?>', '<?php echo htmlspecialchars($tu['employee_id']); ?>', <?php echo $tu['department_id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['designation'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['qualification'])); ?>');" class="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer">Modify</button>
+                                    <button onclick="openEditTeacherModal(<?php echo $tu['id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['name'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['email'])); ?>', '<?php echo htmlspecialchars($tu['phone']); ?>', '<?php echo htmlspecialchars($tu['employee_id']); ?>', <?php echo $tu['department_id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['designation'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['qualification'])); ?>');" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
                                     <a href="actions.php?action=delete_teacher&user_id=<?php echo $tu['id']; ?>" onclick="return confirm('Confirm physical deletion of instructor \'<?php echo htmlspecialchars(addslashes($tu['name'])); ?>\' from global registry?')" class="text-xs font-bold text-red-600 hover:underline cursor-pointer">Remove</a>
                                 </td>
                             </tr>
@@ -471,7 +471,7 @@ $allStudents = $studentsStmt->fetchAll();
 
                     <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
                         <button type="button" onclick="closeTeacherModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#1D4ED8] text-white rounded hover:bg-[#1E40AF]">Save Faculty Profile</button>
+                        <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8]">Save Faculty Profile</button>
                     </div>
                 </form>
             </div>
@@ -526,7 +526,7 @@ $allStudents = $studentsStmt->fetchAll();
                 <p class="text-[#64748B] text-xs">Configure departments, define unique codes, appoint heads.</p>
             </div>
 
-            <button onclick="openAddDeptModal();" class="py-2.5 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95">
+            <button onclick="openAddDeptModal();" class="py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 <span>Configure Academic Sector</span>
             </button>
@@ -542,7 +542,7 @@ $allStudents = $studentsStmt->fetchAll();
                         <p class="text-xs text-[#64748B]"><strong>Head of Dept:</strong> <?php echo htmlspecialchars($d['head_name'] ?: 'None'); ?></p>
                     </div>
                     <div class="border-t pt-3 mt-4 flex justify-end gap-2">
-                        <button onclick="openEditDeptModal(<?php echo $d['id']; ?>, '<?php echo htmlspecialchars(addslashes($d['name'])); ?>', '<?php echo htmlspecialchars(addslashes($d['code'])); ?>', <?php echo $d['head_id'] ?: 'null'; ?>);" class="text-xs font-bold text-[#1D4ED8] hover:underline cursor-pointer">Modify</button>
+                        <button onclick="openEditDeptModal(<?php echo $d['id']; ?>, '<?php echo htmlspecialchars(addslashes($d['name'])); ?>', '<?php echo htmlspecialchars(addslashes($d['code'])); ?>', <?php echo $d['head_id'] ?: 'null'; ?>);" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -581,7 +581,7 @@ $allStudents = $studentsStmt->fetchAll();
 
                     <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
                         <button type="button" onclick="closeDeptModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#1D4ED8] text-white rounded hover:bg-[#1E40AF]">Save Department</button>
+                        <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8]">Save Department</button>
                     </div>
                 </form>
             </div>
@@ -631,7 +631,7 @@ $allStudents = $studentsStmt->fetchAll();
                     <i data-lucide="user-plus" class="w-4 h-4"></i>
                     <span>Enroll Student Scholar</span>
                 </button>
-                <button onclick="openAddCourseModal();" class="py-2.5 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95">
+                <button onclick="openAddCourseModal();" class="py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer transition-transform active:scale-95">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     <span>Create Course catalog</span>
                 </button>
@@ -659,7 +659,7 @@ $allStudents = $studentsStmt->fetchAll();
                                 <td class="p-4 font-bold"><?php echo htmlspecialchars($c['code']); ?></td>
                                 <td class="p-4 font-sans text-slate-800 font-semibold flex items-center justify-between">
                                     <span><?php echo htmlspecialchars($c['title']); ?></span>
-                                    <button onclick="openEditCourseModal(<?php echo $c['id']; ?>, '<?php echo htmlspecialchars(addslashes($c['title'])); ?>', '<?php echo htmlspecialchars(addslashes($c['code'])); ?>', <?php echo $c['department_id']; ?>, <?php echo $c['teacher_id']; ?>, <?php echo $c['credits']; ?>, <?php echo $c['semester']; ?>, '<?php echo htmlspecialchars(addslashes($c['description'])); ?>', '<?php echo $c['status']; ?>');" class="text-[10px] text-[#1D4ED8] hover:underline font-bold font-sans">Modify</button>
+                                    <button onclick="openEditCourseModal(<?php echo $c['id']; ?>, '<?php echo htmlspecialchars(addslashes($c['title'])); ?>', '<?php echo htmlspecialchars(addslashes($c['code'])); ?>', <?php echo $c['department_id']; ?>, <?php echo $c['teacher_id']; ?>, <?php echo $c['credits']; ?>, <?php echo $c['semester']; ?>, '<?php echo htmlspecialchars(addslashes($c['description'])); ?>', '<?php echo $c['status']; ?>');" class="text-[10px] text-[#2563EB] hover:underline font-bold font-sans">Modify</button>
                                 </td>
                                 <td class="p-4 font-sans"><?php echo htmlspecialchars($c['department_name']); ?></td>
                                 <td class="p-4 font-sans"><?php echo htmlspecialchars($c['teacher_name']); ?></td>
@@ -788,7 +788,7 @@ $allStudents = $studentsStmt->fetchAll();
 
                     <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs">
                         <button type="button" onclick="closeCourseModal();" class="px-4 py-2 border rounded hover:bg-slate-50">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-[#1D4ED8] text-white rounded hover:bg-[#1E40AF]">Save Course catalog</button>
+                        <button type="submit" class="px-4 py-2 bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8]">Save Course catalog</button>
                     </div>
                 </form>
             </div>
@@ -1020,7 +1020,7 @@ $allStudents = $studentsStmt->fetchAll();
                         <textarea name="description" rows="4" class="w-full border p-2.5 rounded font-mono" placeholder="Help platform engineers..." required></textarea>
                     </div>
 
-                    <button type="submit" class="w-full py-2.5 bg-[#1C2541] hover:bg-[#1D4ED8] text-white rounded font-bold transition-colors">
+                    <button type="submit" class="w-full py-2.5 bg-[#0F172A] hover:bg-[#2563EB] text-white rounded font-bold transition-colors">
                         Broadcast Job Opening
                     </button>
                 </form>
@@ -1081,7 +1081,7 @@ $allStudents = $studentsStmt->fetchAll();
 
             <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs font-bold">
                 <a href="?tab=dashboard" class="px-4 py-2 border rounded text-slate-600 hover:bg-slate-50 text-center">Cancel</a>
-                <button type="submit" class="px-4 py-2 bg-[#1C2541] hover:bg-[#1D4ED8] text-white rounded">
+                <button type="submit" class="px-4 py-2 bg-[#0F172A] hover:bg-[#2563EB] text-white rounded">
                     Publish Broadcaster
                 </button>
             </div>
@@ -1108,7 +1108,7 @@ $allStudents = $studentsStmt->fetchAll();
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
-                <h3 class="text-xs font-black uppercase tracking-widest text-[#1D4ED8]">Scholars enrollment by sectors</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-[#2563EB]">Scholars enrollment by sectors</h3>
                 <div class="space-y-2 text-xs">
                     <div>
                         <div class="flex justify-between font-bold mb-1">
@@ -1141,10 +1141,10 @@ $allStudents = $studentsStmt->fetchAll();
             </div>
 
             <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
-                <h3 class="text-xs font-black uppercase tracking-widest text-[#1D4ED8]">Placement recruitment success ratios</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-[#2563EB]">Placement recruitment success ratios</h3>
                 <div class="flex items-end justify-around h-32 pt-4 px-2 font-mono font-bold text-[10px] text-slate-400 text-center">
                     <div class="w-8">
-                        <div class="bg-[#1D4ED8] h-24 rounded-t"></div>
+                        <div class="bg-[#2563EB] h-24 rounded-t"></div>
                         <span class="block mt-1">Applied</span>
                     </div>
                     <div class="w-8">
@@ -1187,7 +1187,7 @@ $allStudents = $studentsStmt->fetchAll();
                 <a href="db_seed.php" class="w-full text-center py-2.5 border border-amber-500 hover:bg-amber-50 text-amber-700 rounded font-bold">
                     ⚠️ Restore Database Seeds Default Reset
                 </a>
-                <button type="submit" class="py-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white rounded font-bold">
+                <button type="submit" class="py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded font-bold">
                     Save Institutional settings
                 </button>
             </div>

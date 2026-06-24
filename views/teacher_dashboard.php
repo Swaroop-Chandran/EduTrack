@@ -70,13 +70,12 @@ if (!empty($teacherCourseIds)) {
 
 <?php if ($currentTab === 'dashboard'): ?>
     <div class="space-y-6 animate-fadeIn text-left">
-        <!-- Greeting Banner -->
-        <div>
-            <span class="text-xs uppercase font-black tracking-widest text-[#1D4ED8]">Academic Portal</span>
-            <h1 class="text-3xl font-extrabold text-[#0F172A] tracking-tight mt-1">
-                Welcome back, Professor <?php echo htmlspecialchars($currentUser['name']); ?> 📚
+        <!-- Header -->
+        <div class="border-b border-[#E2E8F0] pb-4">
+            <h1 class="text-2xl font-bold text-[#0F172A] tracking-tight">
+                Faculty Dashboard
             </h1>
-            <p class="text-[#64748B] text-xs">Analyze student engagement metrics, evaluate scripts, and record checklists.</p>
+            <p class="text-[#64748B] text-xs mt-1">Overview of your assigned courses and student deliverables</p>
         </div>
 
         <!-- Statistical KPI summary layout cards -->
@@ -118,7 +117,7 @@ if (!empty($teacherCourseIds)) {
                                 <?php endif; ?>
                             </div>
 
-                            <button onclick="openGradingModal(<?php echo $sub['id']; ?>, <?php echo $sub['max_marks']; ?>, '<?php echo htmlspecialchars(addslashes($sub['student_name'])); ?>', '<?php echo htmlspecialchars(addslashes($sub['asg_title'])); ?>');" class="py-1 px-3 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white font-bold text-xs rounded-lg shrink-0">
+                            <button onclick="openGradingModal(<?php echo $sub['id']; ?>, <?php echo $sub['max_marks']; ?>, '<?php echo htmlspecialchars(addslashes($sub['student_name'])); ?>', '<?php echo htmlspecialchars(addslashes($sub['asg_title'])); ?>');" class="py-1 px-3 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded-lg shrink-0">
                                 Grade Script
                             </button>
                         </div>
@@ -137,7 +136,7 @@ if (!empty($teacherCourseIds)) {
             <!-- Right 4Cols: LMS Quick-deck -->
             <div class="lg:col-span-4 space-y-6">
                 <div class="bg-[#0F172A] text-white rounded-xl p-6 shadow-md space-y-4">
-                    <h3 class="text-xs font-black uppercase tracking-widest text-[#1D4ED8]">LMS Quick-deck</h3>
+                    <h3 class="text-xs font-black uppercase tracking-widest text-[#2563EB]">LMS Quick-deck</h3>
                     <div class="space-y-2 text-left">
                         <a href="?tab=attendance" class="w-full text-left py-2 px-3 border border-white/5 hover:border-slate-500 rounded-lg text-xs font-medium flex items-center justify-between block">
                             <span>Record attendance roll-call</span>
@@ -163,7 +162,7 @@ if (!empty($teacherCourseIds)) {
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
                 <div class="flex items-center gap-2 pb-2 border-b border-slate-50">
-                    <i data-lucide="award" class="w-5 h-5 text-[#1D4ED8]"></i>
+                    <i data-lucide="award" class="w-5 h-5 text-[#2563EB]"></i>
                     <h3 class="text-base font-extrabold text-[#0F172A] tracking-tight">Evaluate Script Marks</h3>
                 </div>
 
@@ -235,7 +234,7 @@ if (!empty($teacherCourseIds)) {
                 <p class="text-[#64748B] text-xs">Manage educational materials, upload presentations slides, or check syllabus modules.</p>
             </div>
             
-            <a href="?tab=upload_material" class="py-2 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer">
+            <a href="?tab=upload_material" class="py-2 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer">
                 <i data-lucide="upload-cloud" class="w-4 h-4"></i>
                 <span>Share Lecture Document</span>
             </a>
@@ -261,7 +260,7 @@ if (!empty($teacherCourseIds)) {
                             <p class="text-xs text-slate-500 font-medium italic mt-0.5">Credits weightage: <?php echo $course['credits']; ?> points • Classroom Year: Term III</p>
                         </div>
                         <div class="flex items-center gap-1 bg-[#F1F5F9] p-2 rounded-lg border border-slate-100 font-medium">
-                            <i data-lucide="users" class="w-4 h-4 text-[#1D4ED8]"></i>
+                            <i data-lucide="users" class="w-4 h-4 text-[#2563EB]"></i>
                             <span class="text-xs font-bold text-slate-700"><?php echo $activeCount; ?> Registered Students</span>
                         </div>
                     </div>
@@ -276,7 +275,7 @@ if (!empty($teacherCourseIds)) {
                                 <?php foreach ($courseMaterials as $mat): ?>
                                     <div class="p-3 border rounded-xl bg-slate-50 flex items-center justify-between text-xs">
                                         <div class="flex items-center gap-2.5">
-                                            <i data-lucide="file-text" class="w-4 h-4 text-[#1D4ED8]"></i>
+                                            <i data-lucide="file-text" class="w-4 h-4 text-[#2563EB]"></i>
                                             <div>
                                                 <span class="font-bold text-[#0F172A] block"><?php echo htmlspecialchars($mat['title']); ?></span>
                                                 <span class="text-[10px] text-slate-400 font-mono"><?php echo htmlspecialchars($mat['file_path']); ?></span>
@@ -344,7 +343,7 @@ if (!empty($teacherCourseIds)) {
 
             <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs font-bold">
                 <a href="?tab=courses" class="px-4 py-2 border rounded text-slate-600 hover:bg-slate-50 text-center">Cancel</a>
-                <button type="submit" class="px-4 py-2 bg-[#1C2541] hover:bg-[#1D4ED8] text-white rounded">
+                <button type="submit" class="px-4 py-2 bg-[#0F172A] hover:bg-[#2563EB] text-white rounded">
                     Publish Resources
                 </button>
             </div>
@@ -360,7 +359,7 @@ if (!empty($teacherCourseIds)) {
                 <p class="text-[#64748B] text-xs">Create new task deadlines, customize maximum marks, check script uploads.</p>
             </div>
 
-            <a href="?tab=create_assignment" class="py-2 px-4 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer">
+            <a href="?tab=create_assignment" class="py-2 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 cursor-pointer">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 <span>Issue New Task</span>
             </a>
@@ -387,7 +386,7 @@ if (!empty($teacherCourseIds)) {
                                 <td class="p-4 font-bold"><?php echo htmlspecialchars($asg['course_code']); ?></td>
                                 <td class="p-4 font-sans text-slate-800 font-semibold"><?php echo htmlspecialchars($asg['title']); ?></td>
                                 <td class="p-4"><?php echo date('Y-m-d H:i', strtotime($asg['due_date'])); ?></td>
-                                <td class="p-4 text-center text-[#1D4ED8] font-bold"><?php echo $subCount; ?> scripts uploaded</td>
+                                <td class="p-4 text-center text-[#2563EB] font-bold"><?php echo $subCount; ?> scripts uploaded</td>
                                 <td class="p-4 text-center"><?php echo $asg['max_marks']; ?> pts</td>
                                 <td class="p-4 text-right">
                                     <?php echo renderBadge($asg['status'], $asg['status'] === 'active' ? 'success' : 'danger'); ?>
@@ -473,7 +472,7 @@ if (!empty($teacherCourseIds)) {
 
             <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 text-xs font-bold">
                 <a href="?tab=assignments" class="px-4 py-2 border rounded text-slate-600 hover:bg-slate-50 text-center">Cancel</a>
-                <button type="submit" class="px-4 py-2 bg-[#1C2541] hover:bg-[#1D4ED8] text-white rounded">
+                <button type="submit" class="px-4 py-2 bg-[#0F172A] hover:bg-[#2563EB] text-white rounded">
                     Publish Assignments
                 </button>
             </div>
@@ -577,7 +576,7 @@ if (!empty($teacherCourseIds)) {
             </div>
 
             <div class="pt-4 border-t border-slate-100 flex justify-end text-xs font-bold">
-                <button type="submit" class="px-5 py-2.5 bg-[#1C2541] hover:bg-[#1D4ED8] text-white rounded">
+                <button type="submit" class="px-5 py-2.5 bg-[#0F172A] hover:bg-[#2563EB] text-white rounded">
                     Save Attendance Batch
                 </button>
             </div>
@@ -621,7 +620,7 @@ if (!empty($teacherCourseIds)) {
 
                 <!-- Schedule New Exam Form -->
                 <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm space-y-4">
-                    <h3 class="text-xs font-black uppercase tracking-widest text-[#1D4ED8]">Schedule Exam Session</h3>
+                    <h3 class="text-xs font-black uppercase tracking-widest text-[#2563EB]">Schedule Exam Session</h3>
                     <form action="actions.php?action=create_exam" method="POST" class="space-y-4 text-xs font-bold">
                         <div>
                             <label class="block text-slate-500 mb-1">Target Curriculum</label>
@@ -668,7 +667,7 @@ if (!empty($teacherCourseIds)) {
                             <label class="block text-slate-500 mb-1">Max Marks</label>
                             <input type="number" name="max_marks" value="100" class="w-full border p-2 rounded" min="1" required />
                         </div>
-                        <button type="submit" class="w-full py-2 bg-[#1C2541] hover:bg-[#1D4ED8] text-white rounded font-bold">
+                        <button type="submit" class="w-full py-2 bg-[#0F172A] hover:bg-[#2563EB] text-white rounded font-bold">
                             Publish Schedule
                         </button>
                     </form>
@@ -747,7 +746,7 @@ if (!empty($teacherCourseIds)) {
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
-                <h3 class="text-xs font-black uppercase tracking-widest text-[#1D4ED8]">Student Turnout Indicators</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-[#2563EB]">Student Turnout Indicators</h3>
                 <div class="space-y-3 text-xs">
                     <div>
                         <div class="flex justify-between font-bold mb-1">
@@ -761,20 +760,20 @@ if (!empty($teacherCourseIds)) {
                     <div>
                         <div class="flex justify-between font-bold mb-1">
                             <span>Database Systems (CS301)</span>
-                            <span class="text-[#1D4ED8]">91%</span>
+                            <span class="text-[#2563EB]">91%</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="bg-[#1D4ED8] h-2 rounded-full" style="width: 91%;"></div>
+                            <div class="bg-[#2563EB] h-2 rounded-full" style="width: 91%;"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white border border-[#E2E8F0] p-6 rounded-xl shadow-sm space-y-4">
-                <h3 class="text-xs font-black uppercase tracking-widest text-[#1D4ED8]">Grade Distributions</h3>
+                <h3 class="text-xs font-black uppercase tracking-widest text-[#2563EB]">Grade Distributions</h3>
                 <div class="flex items-end justify-between h-32 pt-4 px-2 font-mono font-bold text-[10px] text-slate-400 text-center">
                     <div class="w-8">
-                        <div class="bg-[#1D4ED8] h-20 rounded-t"></div>
+                        <div class="bg-[#2563EB] h-20 rounded-t"></div>
                         <span class="block mt-1">A</span>
                     </div>
                     <div class="w-8">
@@ -832,7 +831,7 @@ if (!empty($teacherCourseIds)) {
             </div>
 
             <div class="pt-4 border-t border-slate-100 flex justify-end">
-                <button type="submit" class="py-2.5 px-6 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-bold rounded-lg shadow-sm">
+                <button type="submit" class="py-2.5 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm">
                     Save Profile Changes
                 </button>
             </div>

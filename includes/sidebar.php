@@ -58,7 +58,7 @@ if ($currentUser['role'] === 'admin')   $badgeColor = 'bg-amber-500/20 text-ambe
     <!-- Header Wordmark branding -->
     <div class="p-6 flex items-center justify-between border-b border-white/10 shrink-0">
         <div class="flex items-center gap-3 overflow-hidden">
-            <div class="w-8 h-8 rounded-lg bg-[#1D4ED8] flex items-center justify-center text-white shrink-0 font-black">
+            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shrink-0 font-black">
                 E
             </div>
             <div class="sidebar-text flex flex-col">
@@ -77,7 +77,7 @@ if ($currentUser['role'] === 'admin')   $badgeColor = 'bg-amber-500/20 text-ambe
         <?php foreach ($navItems as $item): 
             $isActive = ($currentTab === $item['id']);
             $activeClass = $isActive 
-                ? 'bg-[#1D4ED8] text-white font-semibold' 
+                ? 'bg-primary text-white font-semibold' 
                 : 'text-[#94A3B8] hover:text-white hover:bg-white/5';
         ?>
             <a href="?tab=<?php echo urlencode($item['id']); ?>" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative <?php echo $activeClass; ?>">

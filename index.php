@@ -86,8 +86,8 @@ $pageTitle = getPageTitle($currentTab, $currentUser['role']);
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1D4ED8',
-                        'primary-hover': '#1E40AF',
+                        primary: '#2563EB',
+                        'primary-hover': '#1D4ED8',
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
