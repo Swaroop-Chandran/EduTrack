@@ -227,8 +227,8 @@ $allStudents = $studentsStmt->fetchAll();
         </div>
 
         <!-- Student Add/Edit Modal -->
-        <div id="student_modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn hidden">
-            <div class="bg-white border rounded-xl p-6 w-full max-w-lg shadow-xl relative max-h-[90vh] overflow-y-auto">
+        <div id="student_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-lg relative max-h-[90vh] overflow-y-auto animate-modalContent">
                 <button onclick="closeStudentModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -417,8 +417,8 @@ $allStudents = $studentsStmt->fetchAll();
         </div>
 
         <!-- Teacher Add/Edit Modal -->
-        <div id="teacher_modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn hidden">
-            <div class="bg-white border rounded-xl p-6 w-full max-w-lg shadow-xl relative">
+        <div id="teacher_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-lg relative max-h-[90vh] overflow-y-auto animate-modalContent">
                 <button onclick="closeTeacherModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -549,8 +549,8 @@ $allStudents = $studentsStmt->fetchAll();
         </div>
 
         <!-- Department Modal -->
-        <div id="dept_modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn hidden">
-            <div class="bg-white border rounded-xl p-6 w-full max-w-md shadow-xl relative">
+        <div id="dept_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-md shadow-lg relative animate-modalContent">
                 <button onclick="closeDeptModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -724,8 +724,8 @@ $allStudents = $studentsStmt->fetchAll();
         </div>
 
         <!-- Course Add/Edit Modal -->
-        <div id="course_modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn hidden">
-            <div class="bg-white border rounded-xl p-6 w-full max-w-lg shadow-xl relative">
+        <div id="course_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-lg relative animate-modalContent">
                 <button onclick="closeCourseModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -795,8 +795,8 @@ $allStudents = $studentsStmt->fetchAll();
         </div>
 
         <!-- Enroll Student Modal -->
-        <div id="enroll_modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn hidden">
-            <div class="bg-white border rounded-xl p-6 w-full max-w-md shadow-xl relative">
+        <div id="enroll_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-md shadow-lg relative animate-modalContent">
                 <button onclick="closeEnrollStudentModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>

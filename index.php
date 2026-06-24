@@ -114,6 +114,14 @@ $pageTitle = getPageTitle($currentTab, $currentUser['role']);
         ::-webkit-scrollbar-thumb:hover {
             background: #94A3B8;
         }
+        @keyframes modalBackdropFadeIn {
+            from { opacity: 0; backdrop-filter: blur(0px); background-color: rgba(15, 23, 42, 0); }
+            to { opacity: 1; backdrop-filter: blur(4px); background-color: rgba(15, 23, 42, 0.3); }
+        }
+        @keyframes modalScaleIn {
+            from { transform: scale(0.97); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
@@ -128,6 +136,12 @@ $pageTitle = getPageTitle($currentTab, $currentUser['role']);
         }
         .animate-shake {
             animation: shake 0.25s ease-in-out;
+        }
+        .animate-modalBackdrop {
+            animation: modalBackdropFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-modalContent {
+            animation: modalScaleIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
     <!-- Lucide CDN -->

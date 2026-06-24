@@ -156,8 +156,8 @@ if (!empty($teacherCourseIds)) {
         </div>
 
         <!-- Grading script Modal Overlay -->
-        <div id="grading_modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn hidden">
-            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-xl space-y-4 relative">
+        <div id="grading_modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-modalBackdrop hidden">
+            <div class="bg-white border border-[#E2E8F0] rounded-xl p-6 w-full max-w-lg shadow-lg relative animate-modalContent space-y-4">
                 <button onclick="closeGradingModal();" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
