@@ -38,6 +38,7 @@ function getNavItems(string $role, bool $forceProfileCompletion = false): array 
         case 'admin':
             return [
                 ['id' => 'dashboard', 'name' => 'LMS Insights', 'icon' => 'layout-dashboard'],
+                ['id' => 'admissions', 'name' => 'Admissions Request', 'icon' => 'clipboard-check'],
                 ['id' => 'students', 'name' => 'Students Registry', 'icon' => 'users-2'],
                 ['id' => 'teachers', 'name' => 'Teachers Registry', 'icon' => 'graduation-cap'],
                 ['id' => 'departments', 'name' => 'Departments', 'icon' => 'building-2'],

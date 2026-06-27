@@ -122,6 +122,266 @@ $allStudents = $studentsStmt->fetchAll();
         </div>
     </div>
 
+<?php elseif ($currentTab === 'admissions'): 
+    $admissionsStmt = $db->query("
+        SELECT ar.*, d.name as department_name 
+        FROM admission_requests ar 
+        JOIN departments d ON ar.department_id = d.id 
+        ORDER BY ar.created_at DESC
+    ");
+    $admissions = $admissionsStmt->fetchAll();
+?>
+    <!-- Admissions Requests Dashboard Component -->
+    <div class="space-y-6 animate-fadeIn text-left">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-xl font-extrabold text-white tracking-tight">Student Admission Applications</h1>
+                <p class="text-slate-400 text-xs mt-1">Review and process new candidate enrollment applications.</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950/20">
+                <span class="text-xs font-bold text-white uppercase tracking-wider">Submitted Applications</span>
+                <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-full text-[10px] font-bold"><?php echo count($admissions); ?> Total</span>
+            </div>
+
+            <?php if (empty($admissions)): ?>
+                <div class="p-12 text-center text-slate-500">
+                    <i data-lucide="inbox" class="w-12 h-12 mx-auto text-slate-600 mb-3"></i>
+                    <p class="text-sm font-semibold">No admission requests submitted yet.</p>
+                </div>
+            <?php else: ?>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs font-semibold text-slate-400">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-[10px] uppercase text-slate-500 font-black tracking-wider bg-slate-950/40">
+                                <th class="p-4">App ID</th>
+                                <th class="p-4">Applicant Name</th>
+                                <th class="p-4">Contact Info</th>
+                                <th class="p-4">Desired Programme</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <?php foreach ($admissions as $req): ?>
+                                <tr class="hover:bg-slate-800/30 transition-colors duration-150">
+                                    <td class="p-4 font-mono font-bold">#<?php echo $req['id']; ?></td>
+                                    <td class="p-4">
+                                        <span class="text-white font-bold text-sm block"><?php echo htmlspecialchars($req['name']); ?></span>
+                                        <span class="text-[10px] text-slate-500 block mt-0.5">DOB: <?php echo htmlspecialchars($req['dob']); ?></span>
+                                    </td>
+                                    <td class="p-4">
+                                        <span class="block"><?php echo htmlspecialchars($req['email']); ?></span>
+                                        <span class="text-[10px] text-slate-500 block mt-0.5">Phone: <?php echo htmlspecialchars($req['phone']); ?></span>
+                                    </td>
+                                    <td class="p-4">
+                                        <span class="text-slate-300 block"><?php echo htmlspecialchars($req['programme']); ?></span>
+                                        <span class="text-[10px] text-[#2563EB] font-bold block uppercase mt-0.5"><?php echo htmlspecialchars($req['department_name']); ?></span>
+                                    </td>
+                                    <td class="p-4">
+                                        <?php 
+                                        $status = $req['status'];
+                                        if ($status === 'Approved') {
+                                            echo '<span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[9px] font-bold uppercase tracking-wider">Approved</span>';
+                                        } elseif ($status === 'Rejected') {
+                                            echo '<span class="px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded text-[9px] font-bold uppercase tracking-wider">Rejected</span>';
+                                        } else {
+                                            echo '<span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded text-[9px] font-bold uppercase tracking-wider">Pending</span>';
+                                        }
+                                        ?>
+                                    </td>
+                                    <td class="p-4 text-right space-x-2 whitespace-nowrap">
+                                        <button onclick="openReviewModal(<?php echo htmlspecialchars(json_encode($req)); ?>)" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Review Details</button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Review Details Modal -->
+    <div id="review_modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden animate-fadeIn text-left">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
+                <div>
+                    <h3 class="text-base font-extrabold text-white">Review Admission Application</h3>
+                    <span id="review_id" class="text-[10px] font-mono text-[#2563EB] font-bold uppercase mt-1 block">Application #0</span>
+                </div>
+                <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                <div class="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-400">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase font-black tracking-wider">Applicant Full Name</span>
+                        <span id="review_name" class="text-sm font-bold text-white block mt-0.5"></span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase font-black tracking-wider">Date of Birth & Gender</span>
+                        <span id="review_dob_gender" class="text-sm font-bold text-white block mt-0.5"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-400">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase font-black tracking-wider">Contact Email</span>
+                        <span id="review_email" class="text-white block mt-0.5"></span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase font-black tracking-wider">Contact Mobile</span>
+                        <span id="review_phone" class="text-white block mt-0.5"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-xs font-semibold text-slate-400">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase font-black tracking-wider">Academic Target</span>
+                        <span id="review_target" class="text-white block mt-0.5"></span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase font-black tracking-wider">Preferred Sector</span>
+                        <span id="review_dept" class="text-[#2563EB] block font-bold mt-0.5"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="text-[10px] text-slate-500 block uppercase font-black tracking-wider">Residential Address</span>
+                    <p id="review_address" class="text-white text-xs leading-relaxed mt-1 p-3 bg-slate-800/40 border border-slate-800 rounded-xl font-medium"></p>
+                </div>
+
+                <!-- Document links -->
+                <div class="p-4 bg-slate-850 border border-slate-800 rounded-2xl space-y-3">
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Uploaded Registry Credentials</span>
+                    <div class="grid grid-cols-2 gap-3" id="document_links_container">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Actions Footer -->
+            <div class="p-6 border-t border-slate-800 bg-slate-950/40 flex justify-between items-center">
+                <button onclick="closeReviewModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold transition-all">Cancel</button>
+                <div class="flex gap-2" id="action_buttons_container">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Reason Remarks Modal -->
+    <div id="reject_modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-fadeIn text-left">
+            <div class="p-5 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-sm font-bold text-white">Provide Rejection Remarks</h3>
+                <button onclick="closeRejectModal()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form action="actions.php?action=admin_reject_admission" method="POST" class="p-5 space-y-4">
+                <input type="hidden" name="request_id" id="reject_request_id" value="" />
+                
+                <div>
+                    <label for="reject_remarks" class="block text-xs font-bold text-slate-400 mb-1">Remarks / Reason for Rejection</label>
+                    <textarea id="reject_remarks" name="remarks" rows="4" placeholder="Candidate mismatch, certificate is unreadable, etc..." class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:ring-1 focus:ring-red-500 font-medium" required></textarea>
+                </div>
+
+                <div class="flex justify-between mt-4">
+                    <button type="button" onclick="closeRejectModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold">Back</button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-colors">Submit Rejection</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openReviewModal(req) {
+            document.getElementById('review_id').innerText = `Application #` + req.id;
+            document.getElementById('review_name').innerText = req.name;
+            document.getElementById('review_dob_gender').innerText = req.dob + ` (` + req.gender + `)`;
+            document.getElementById('review_email').innerText = req.email;
+            document.getElementById('review_phone').innerText = req.phone;
+            document.getElementById('review_target').innerText = req.programme + ` (` + req.academic_year + `)`;
+            document.getElementById('review_dept').innerText = req.department_name;
+            document.getElementById('review_address').innerText = req.address;
+
+            // Render Documents
+            const docContainer = document.getElementById('document_links_container');
+            docContainer.innerHTML = '';
+            
+            const docs = [
+                { name: '10th Certificate', path: req.doc_10th },
+                { name: '+2 Certificate', path: req.doc_12th },
+                { name: 'Transfer Certificate', path: req.doc_tc },
+                { name: 'Caste Certificate', path: req.doc_caste }
+            ];
+
+            docs.forEach(doc => {
+                if (doc.path) {
+                    const el = document.createElement('a');
+                    el.href = 'uploads/documents/' + doc.path;
+                    el.target = '_blank';
+                    el.className = 'p-3 bg-slate-855 border border-slate-800 hover:border-[#2563EB] rounded-xl flex items-center justify-between text-xs text-white transition-all w-full';
+                    el.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="file-text" class="w-4 h-4 text-[#2563EB]"></i>
+                            <span class="font-bold">` + doc.name + `</span>
+                        </div>
+                        <i data-lucide="download" class="w-3.5 h-3.5 text-slate-400"></i>
+                    `;
+                    docContainer.appendChild(el);
+                } else {
+                    const el = document.createElement('div');
+                    el.className = 'p-3 bg-slate-800/20 border border-slate-800/50 rounded-xl flex items-center text-xs text-slate-500 w-full';
+                    el.innerHTML = `
+                        <i data-lucide="file-x" class="w-4 h-4 mr-2"></i>
+                        <span>No ` + doc.name + `</span>
+                    `;
+                    docContainer.appendChild(el);
+                }
+            });
+
+            // Action buttons footer
+            const actionContainer = document.getElementById('action_buttons_container');
+            actionContainer.innerHTML = '';
+
+            if (req.status === 'Pending') {
+                actionContainer.innerHTML = `
+                    <button onclick="triggerReject(` + req.id + `)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all">Reject</button>
+                    <form action="actions.php?action=admin_approve_admission" method="POST" onsubmit="return confirm('Confirm approval of candidate ` + req.name.replace(/'/g, "\\'") + `? This will generate credentials and dispatch welcome email.');">
+                        <input type="hidden" name="request_id" value="` + req.id + `" />
+                        <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all">Approve Admission</button>
+                    </form>
+                `;
+            } else {
+                actionContainer.innerHTML = `
+                    <span class="text-xs text-slate-500 font-bold uppercase italic p-2 border border-slate-800 rounded-lg">Processed: ` + req.status + `</span>
+                `;
+            }
+
+            document.getElementById('review_modal').classList.remove('hidden');
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        function closeReviewModal() {
+            document.getElementById('review_modal').classList.add('hidden');
+        }
+
+        function triggerReject(id) {
+            closeReviewModal();
+            document.getElementById('reject_request_id').value = id;
+            document.getElementById('reject_modal').classList.remove('hidden');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('reject_modal').classList.add('hidden');
+        }
+    </script>
+
 <?php elseif ($currentTab === 'students'): ?>
     <!-- ADMIN STUDENTS Registry -->
     <div class="space-y-6 animate-fadeIn text-left">
@@ -284,7 +544,11 @@ $allStudents = $studentsStmt->fetchAll();
                                     </div>
                                 </td>
                                 <td class="p-4 text-right space-x-2 font-sans whitespace-nowrap">
-                                    <a href="actions.php?action=reset_password&user_id=<?php echo $su['id']; ?>" onclick="return confirm('Reset password for student \'<?php echo htmlspecialchars(addslashes($su['name'])); ?>\'?')" class="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Reset Pw</a>
+                                    <?php if (($su['activation_status'] ?? 'inactive') === 'inactive'): ?>
+                                        <a href="actions.php?action=admin_resend_activation&user_id=<?php echo $su['id']; ?>" onclick="return confirm('Resend activation link for student \'<?php echo htmlspecialchars(addslashes($su['name'])); ?>\'?')" class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Resend Link</a>
+                                    <?php else: ?>
+                                        <a href="actions.php?action=reset_password&user_id=<?php echo $su['id']; ?>" onclick="return confirm('Reset password for student \'<?php echo htmlspecialchars(addslashes($su['name'])); ?>\'?')" class="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Reset Pw</a>
+                                    <?php endif; ?>
                                     <button onclick="openEditStudentModal(<?php echo $su['id']; ?>, '<?php echo htmlspecialchars(addslashes($su['name'])); ?>', '<?php echo htmlspecialchars(addslashes($su['email'])); ?>', '<?php echo htmlspecialchars($su['phone']); ?>', '<?php echo htmlspecialchars($su['roll_no']); ?>', <?php echo $su['department_id']; ?>, <?php echo $su['year']; ?>, <?php echo $su['semester']; ?>, '<?php echo $su['dob']; ?>', '<?php echo htmlspecialchars(addslashes($su['address'])); ?>', '<?php echo htmlspecialchars(addslashes($su['admission_no'])); ?>', '<?php echo htmlspecialchars(addslashes($su['programme'])); ?>', '<?php echo htmlspecialchars(addslashes($su['section'])); ?>');" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
                                     <a href="actions.php?action=delete_student&user_id=<?php echo $su['id']; ?>" onclick="return confirm('Confirm physical deletion of student account \'<?php echo htmlspecialchars(addslashes($su['name'])); ?>\'?')" class="text-xs font-bold text-red-600 hover:underline cursor-pointer">Remove</a>
                                 </td>
@@ -530,8 +794,12 @@ $allStudents = $studentsStmt->fetchAll();
                                     </a>
                                 </td>
                                 <td class="p-4 text-right space-x-2 font-sans whitespace-nowrap">
-                                    <a href="actions.php?action=reset_password&user_id=<?php echo $tu['id']; ?>" onclick="return confirm('Reset password for teacher \'<?php echo htmlspecialchars(addslashes($tu['name'])); ?>\'?')" class="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Reset Pw</a>
-                                    <button onclick="openEditTeacherModal(<?php echo $tu['id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['name'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['email'])); ?>', '<?php echo htmlspecialchars($tu['phone']); ?>', '<?php echo htmlspecialchars($tu['employee_id']); ?>', <?php echo $tu['department_id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['designation'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['qualification'])); ?>');" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
+                                    <?php if (($tu['activation_status'] ?? 'inactive') === 'inactive'): ?>
+                                        <a href="actions.php?action=admin_resend_activation&user_id=<?php echo $tu['id']; ?>" onclick="return confirm('Resend activation link for teacher \'<?php echo htmlspecialchars(addslashes($tu['name'])); ?>\'?')" class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Resend Link</a>
+                                    <?php else: ?>
+                                        <a href="actions.php?action=reset_password&user_id=<?php echo $tu['id']; ?>" onclick="return confirm('Reset password for teacher \'<?php echo htmlspecialchars(addslashes($tu['name'])); ?>\'?')" class="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Reset Pw</a>
+                                    <?php endif; ?>
+                                    <button onclick="openEditTeacherModal(<?php echo $tu['id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['name'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['email'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['phone'])); ?>', '<?php echo htmlspecialchars($tu['employee_id']); ?>', <?php echo $tu['department_id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['designation'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['qualification'])); ?>');" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
                                     <a href="actions.php?action=delete_teacher&user_id=<?php echo $tu['id']; ?>" onclick="return confirm('Confirm physical deletion of instructor \'<?php echo htmlspecialchars(addslashes($tu['name'])); ?>\' from global registry?')" class="text-xs font-bold text-red-600 hover:underline cursor-pointer">Remove</a>
                                 </td>
                             </tr>

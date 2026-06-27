@@ -3,9 +3,69 @@
 session_start();
 
 require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/config/mail.php';
 require_once __DIR__ . '/includes/helpers.php';
 
 $db = Database::connect();
+
+function logActivity($userId, $eventType, $message, $db) {
+    try {
+        $stmt = $db->prepare("INSERT INTO activity_logs (user_id, event_type, message) VALUES (:uid, :type, :msg)");
+        $stmt->execute([
+            ':uid' => $userId,
+            ':type' => $eventType,
+            ':msg' => $message
+        ]);
+    } catch (Exception $e) {
+        // Silently fail or log to error log
+    }
+}
+
+function sendActivationEmail($userName, $email, $identifier, $token, $role, $db) {
+    $proto = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    
+    $dir = '';
+    if (isset($_SERVER['PHP_SELF'])) {
+        $dir = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+    } else {
+        $dir = '/EduTrack';
+    }
+    
+    $activationUrl = "{$proto}://{$host}{$dir}/index.php?action=activate&token={$token}";
+    
+    $subject = "Activate Your EduTrack LMS Account";
+    $body = "Hi {$userName},\n\n";
+    $body .= "Your official EduTrack LMS account as a {$role} has been initialized.\n\n";
+    $body .= "Username: {$identifier}\n";
+    $body .= "Activation Link: {$activationUrl}\n\n";
+    $body .= "Please note that this activation link will expire in 24 hours. Once activated, you will be prompted to set up your password and complete your institutional profile details.\n\n";
+    $body .= "If you experience any issues, please reach out to our institutional support desk at support@edutrack.com.\n\n";
+    $body .= "Regards,\nEduTrack Registrar Office\n";
+
+    $logDir = __DIR__ . '/logs';
+    if (!file_exists($logDir)) {
+        mkdir($logDir, 0777, true);
+    }
+    $logPath = $logDir . '/mail_log.log';
+    
+    $logContent = "==================================================\n";
+    $logContent .= "Timestamp: " . date('Y-m-d H:i:s') . "\n";
+    $logContent .= "To: {$email}\n";
+    $logContent .= "Subject: {$subject}\n";
+    $logContent .= "Content:\n{$body}";
+    $logContent .= "==================================================\n\n";
+    
+    file_put_contents($logPath, $logContent, FILE_APPEND);
+
+    $headers = "From: registrar@edutrack.com\r\n" .
+               "Reply-To: support@edutrack.com\r\n" .
+               "X-Mailer: PHP/" . phpversion();
+               
+    @mail($email, $subject, $body, $headers);
+    
+    logActivity(null, 'activation_email_sent', "Activation link emailed to {$email} for identifier {$identifier}", $db);
+}
 
 $action = $_GET['action'] ?? '';
 
@@ -57,12 +117,13 @@ switch ($action) {
             FROM users u
             LEFT JOIN student_profiles sp ON u.id = sp.user_id
             LEFT JOIN teacher_profiles tp ON u.id = tp.user_id
-            WHERE u.email = :login_id1 OR sp.roll_no = :login_id2 OR tp.employee_id = :login_id3
+            WHERE u.email = :login_id1 OR sp.roll_no = :login_id2 OR tp.employee_id = :login_id3 OR sp.admission_no = :login_id4
         ");
         $stmt->execute([
             ':login_id1' => $email,
             ':login_id2' => $email,
-            ':login_id3' => $email
+            ':login_id3' => $email,
+            ':login_id4' => $email
         ]);
         $user = $stmt->fetch();
 
@@ -72,7 +133,14 @@ switch ($action) {
             exit;
         }
 
-        if ($user['password'] !== $password) {
+        $passwordMatch = false;
+        if (password_verify($password, $user['password'])) {
+            $passwordMatch = true;
+        } elseif ($user['password'] === $password) {
+            $passwordMatch = true;
+        }
+
+        if (!$passwordMatch) {
             $_SESSION['login_error'] = 'Incorrect email or password';
             header('Location: index.php');
             exit;
@@ -509,21 +577,25 @@ switch ($action) {
         $semester = (int)($_POST['semester'] ?? 1);
         $dob = trim($_POST['dob'] ?? '');
         $address = trim($_POST['address'] ?? '');
-        $password = trim($_POST['password'] ?? '');
-        if ($password === '') {
-            $password = $admissionNo;
-        }
+        $token = bin2hex(random_bytes(32));
+        $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        $password = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
 
         // Create User
-        $userStmt = $db->prepare("INSERT INTO users (name, email, password, role, avatar, phone, status, password_changed) 
-                                  VALUES (:name, :email, :password, 'student', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', :phone, 'active', 0)");
+        $userStmt = $db->prepare("INSERT INTO users (name, email, password, role, avatar, phone, status, password_changed, activation_status, activation_token, token_expires_at) 
+                                  VALUES (:name, :email, :password, 'student', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', :phone, 'inactive', 0, 'inactive', :token, :expires)");
         $userStmt->execute([
             ':name' => $name,
             ':email' => $email,
             ':password' => $password,
-            ':phone' => $phone
+            ':phone' => $phone,
+            ':token' => $token,
+            ':expires' => $expiry
         ]);
         $newUserId = $db->lastInsertId();
+
+        sendActivationEmail($name, $email, $admissionNo, $token, 'student', $db);
+        logActivity($newUserId, 'student_created', "Admin created inactive student account for {$name} ({$admissionNo})", $db);
 
         // Create Profile
         $profStmt = $db->prepare("INSERT INTO student_profiles (user_id, roll_no, department_id, year, semester, cgpa, dob, address, admission_no, programme, section) 
@@ -629,21 +701,25 @@ switch ($action) {
         $deptId = (int)($_POST['department_id'] ?? 1);
         $designation = trim($_POST['designation'] ?? '');
         $qualification = trim($_POST['qualification'] ?? '');
-        $password = trim($_POST['password'] ?? '');
-        if ($password === '') {
-            $password = $empId;
-        }
+        $token = bin2hex(random_bytes(32));
+        $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        $password = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
 
         // Create User
-        $userStmt = $db->prepare("INSERT INTO users (name, email, password, role, avatar, phone, status, password_changed, activation_status) 
-                                  VALUES (:name, :email, :password, 'teacher', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150', :phone, 'inactive', 0, 'inactive')");
+        $userStmt = $db->prepare("INSERT INTO users (name, email, password, role, avatar, phone, status, password_changed, activation_status, activation_token, token_expires_at) 
+                                  VALUES (:name, :email, :password, 'teacher', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150', :phone, 'inactive', 0, 'inactive', :token, :expires)");
         $userStmt->execute([
             ':name' => $name,
             ':email' => $email,
             ':password' => $password,
-            ':phone' => $phone
+            ':phone' => $phone,
+            ':token' => $token,
+            ':expires' => $expiry
         ]);
         $newUserId = $db->lastInsertId();
+
+        sendActivationEmail($name, $email, $empId, $token, 'teacher', $db);
+        logActivity($newUserId, 'teacher_created', "Admin created inactive teacher account for {$name} ({$empId})", $db);
 
         // Create Profile
         $profStmt = $db->prepare("INSERT INTO teacher_profiles (user_id, employee_id, department_id, designation, qualification) 
@@ -1415,8 +1491,10 @@ switch ($action) {
             header('Location: index.php');
             exit;
         }
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
         $stmt = $db->prepare("UPDATE users SET password = :password, password_changed = 1 WHERE id = :id");
-        $stmt->execute([':password' => $newPassword, ':id' => $currentUser['id']]);
+        $stmt->execute([':password' => $hashedPassword, ':id' => $currentUser['id']]);
+        logActivity($currentUser['id'], 'password_setup', "User updated security password via forced change interception", $db);
         $_SESSION['flash_success'] = 'Password changed successfully! Welcome to your dashboard.';
         header('Location: index.php');
         exit;
@@ -1444,8 +1522,10 @@ switch ($action) {
                 $tpObj = $tp->fetch();
                 $defaultPassword = $tpObj['employee_id'] ?: 'teacher123';
             }
+            $hashedReset = password_hash($defaultPassword, PASSWORD_DEFAULT);
             $resetStmt = $db->prepare("UPDATE users SET password = :password, password_changed = 0 WHERE id = :id");
-            $resetStmt->execute([':password' => $defaultPassword, ':id' => $userId]);
+            $resetStmt->execute([':password' => $hashedReset, ':id' => $userId]);
+            logActivity($userId, 'password_reset', "Admin reset password for user ID {$userId} to identifier", $db);
             $_SESSION['flash_success'] = "Password reset successfully for {$targetUser['name']}! Default is set to their identifier, and they will be forced to change it on next login.";
         }
         header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
@@ -1510,77 +1590,46 @@ switch ($action) {
         header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
         exit;
 
-    case 'activate_account':
+    case 'complete_activation':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: index.php');
             exit;
         }
 
-        $role = trim($_POST['role'] ?? '');
-        $identifier = trim($_POST['identifier'] ?? '');
-        $verificationVal = trim($_POST['verification_val'] ?? '');
+        $token = trim($_POST['token'] ?? '');
         $newPassword = trim($_POST['new_password'] ?? '');
         $confirmPassword = trim($_POST['confirm_password'] ?? '');
 
-        if ($role === '' || $identifier === '' || $verificationVal === '' || $newPassword === '') {
-            $_SESSION['flash_danger'] = 'All fields are required for account activation.';
-            header('Location: index.php');
+        if ($token === '' || $newPassword === '') {
+            $_SESSION['flash_danger'] = 'All fields are required.';
+            header('Location: index.php?action=activate&token=' . urlencode($token));
             exit;
         }
 
         if ($newPassword !== $confirmPassword) {
             $_SESSION['flash_danger'] = 'Create Password and Confirm Password do not match.';
-            header('Location: index.php');
+            header('Location: index.php?action=activate&token=' . urlencode($token));
             exit;
         }
 
-        // Find user by role and identifier
-        $user = null;
-        if ($role === 'student') {
-            $stmt = $db->prepare("
-                SELECT u.*, sp.dob 
-                FROM users u
-                JOIN student_profiles sp ON u.id = sp.user_id
-                WHERE u.role = 'student' AND sp.admission_no = :identifier
-            ");
-            $stmt->execute([':identifier' => $identifier]);
-            $user = $stmt->fetch();
-        } elseif ($role === 'teacher') {
-            $stmt = $db->prepare("
-                SELECT u.*, tp.dob 
-                FROM users u
-                JOIN teacher_profiles tp ON u.id = tp.user_id
-                WHERE u.role = 'teacher' AND tp.employee_id = :identifier
-            ");
-            $stmt->execute([':identifier' => $identifier]);
-            $user = $stmt->fetch();
-        }
+        // Verify token is valid and not expired
+        $stmt = $db->prepare("SELECT * FROM users WHERE activation_token = :token AND token_expires_at > NOW()");
+        $stmt->execute([':token' => $token]);
+        $user = $stmt->fetch();
 
         if (!$user) {
-            $_SESSION['flash_danger'] = 'Account record not found in the institution registry.';
+            $_SESSION['flash_danger'] = 'The activation link has expired or is invalid. Please request a new one.';
             header('Location: index.php');
             exit;
         }
 
-        if ($user['activation_status'] !== 'inactive') {
-            $_SESSION['flash_danger'] = 'This account is already activated. Please sign in or use forgot password.';
+        if ($user['status'] === 'active' && $user['activation_status'] === 'active') {
+            $_SESSION['flash_danger'] = 'Account is already fully active.';
             header('Location: index.php');
             exit;
         }
 
-        // Verification validation
-        $verified = false;
-        if (!empty($user['dob']) && $verificationVal === $user['dob']) {
-            $verified = true;
-        } elseif ($verificationVal === $user['email'] || $verificationVal === $user['phone']) {
-            $verified = true;
-        }
-
-        if (!$verified) {
-            $_SESSION['flash_danger'] = 'Verification failed. Date of birth, email, or mobile number did not match the registered record.';
-            header('Location: index.php');
-            exit;
-        }
+        $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
 
         // Perform activation
         $actStmt = $db->prepare("
@@ -1589,15 +1638,848 @@ switch ($action) {
                 status = 'active', 
                 activation_status = 'profile_pending', 
                 password_changed = 1,
+                activation_token = NULL,
+                token_expires_at = NULL,
                 activated_at = NOW() 
             WHERE id = :id
         ");
         $actStmt->execute([
-            ':password' => $newPassword,
+            ':password' => $hashed,
             ':id' => $user['id']
         ]);
 
-        $_SESSION['flash_success'] = 'Account activated successfully! Please sign in with your new password to complete your profile.';
+        logActivity($user['id'], 'account_activated', "User activated account and set security password", $db);
+
+        $_SESSION['flash_success'] = 'Account activated successfully! Please sign in to complete your profile.';
+        header('Location: index.php');
+        exit;
+
+    case 'request_activation_link':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        $role = trim($_POST['role'] ?? '');
+        $identifier = trim($_POST['identifier'] ?? '');
+
+        if ($role === '' || $identifier === '') {
+            $_SESSION['flash_danger'] = 'All fields are required.';
+            header('Location: index.php');
+            exit;
+        }
+
+        $user = null;
+        if ($role === 'student') {
+            $stmt = $db->prepare("
+                SELECT u.* 
+                FROM users u
+                JOIN student_profiles sp ON u.id = sp.user_id
+                WHERE u.role = 'student' AND sp.admission_no = :id
+            ");
+            $stmt->execute([':id' => $identifier]);
+            $user = $stmt->fetch();
+        } elseif ($role === 'teacher') {
+            $stmt = $db->prepare("
+                SELECT u.* 
+                FROM users u
+                JOIN teacher_profiles tp ON u.id = tp.user_id
+                WHERE u.role = 'teacher' AND tp.employee_id = :id
+            ");
+            $stmt->execute([':id' => $identifier]);
+            $user = $stmt->fetch();
+        }
+
+        if (!$user) {
+            $_SESSION['flash_danger'] = 'No registry record found for the provided identifier.';
+            header('Location: index.php');
+            exit;
+        }
+
+        if ($user['status'] === 'active' && $user['activation_status'] === 'active') {
+            $_SESSION['flash_danger'] = 'This account is already activated. Please sign in.';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Generate new token
+        $token = bin2hex(random_bytes(32));
+        $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+        $upStmt = $db->prepare("UPDATE users SET activation_token = :token, token_expires_at = :expires WHERE id = :id");
+        $upStmt->execute([
+            ':token' => $token,
+            ':expires' => $expiry,
+            ':id' => $user['id']
+        ]);
+
+        sendActivationEmail($user['name'], $user['email'], $identifier, $token, $role, $db);
+        logActivity($user['id'], 'activation_link_rerequested', "User re-requested activation email link", $db);
+
+        $_SESSION['flash_success'] = 'A secure activation link has been sent to your registered email address.';
+        header('Location: index.php');
+        exit;
+
+    case 'admin_resend_activation':
+        if ($currentUser['role'] !== 'admin') {
+            $_SESSION['flash_danger'] = 'Access denied.';
+            header('Location: index.php');
+            exit;
+        }
+
+        $userId = (int)($_GET['user_id'] ?? 0);
+        $uStmt = $db->prepare("SELECT * FROM users WHERE id = :id");
+        $uStmt->execute([':id' => $userId]);
+        $targetUser = $uStmt->fetch();
+
+        if ($targetUser) {
+            $identifier = '';
+            if ($targetUser['role'] === 'student') {
+                $sp = $db->prepare("SELECT admission_no FROM student_profiles WHERE user_id = :uid");
+                $sp->execute([':uid' => $userId]);
+                $identifier = $sp->fetchColumn() ?: 'student';
+            } elseif ($targetUser['role'] === 'teacher') {
+                $tp = $db->prepare("SELECT employee_id FROM teacher_profiles WHERE user_id = :uid");
+                $tp->execute([':uid' => $userId]);
+                $identifier = $tp->fetchColumn() ?: 'teacher';
+            }
+
+            $token = bin2hex(random_bytes(32));
+            $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+            $upStmt = $db->prepare("UPDATE users SET activation_token = :token, token_expires_at = :expires WHERE id = :id");
+            $upStmt->execute([
+                ':token' => $token,
+                ':expires' => $expiry,
+                ':id' => $userId
+            ]);
+
+            sendActivationEmail($targetUser['name'], $targetUser['email'], $identifier, $token, $targetUser['role'], $db);
+            logActivity($userId, 'admin_activation_link_resent', "Admin resent activation link to registered email", $db);
+
+            $_SESSION['flash_success'] = "Activation link resent successfully to {$targetUser['email']}.";
+        }
+        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
+        exit;
+
+    case 'submit_admission_request':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $dob = trim($_POST['dob'] ?? '');
+        $gender = trim($_POST['gender'] ?? '');
+        $address = trim($_POST['address'] ?? '');
+        $department_id = (int)($_POST['department_id'] ?? 0);
+        $programme = trim($_POST['programme'] ?? '');
+        $academic_year = trim($_POST['academic_year'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+        $confirm_password = trim($_POST['confirm_password'] ?? '');
+
+        // Validation
+        if (
+            $name === '' || $email === '' || $phone === '' || $dob === '' || $gender === '' ||
+            $address === '' || $department_id <= 0 || $programme === '' || $academic_year === '' ||
+            $password === '' || $confirm_password === ''
+        ) {
+            $_SESSION['flash_danger'] = 'All registration details and credentials are required.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        if ($password !== $confirm_password) {
+            $_SESSION['flash_danger'] = 'Passwords do not match.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        if (strlen($password) < 6) {
+            $_SESSION['flash_danger'] = 'Password must be at least 6 characters.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        // Duplicate checks: check users table and active admission requests
+        $chkUser = $db->prepare("SELECT id FROM users WHERE email = :email");
+        $chkUser->execute([':email' => $email]);
+        if ($chkUser->fetch()) {
+            $_SESSION['flash_danger'] = 'An account with this email address already exists.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        $chkReq = $db->prepare("SELECT id FROM admission_requests WHERE (email = :email OR phone = :phone) AND status != 'Rejected'");
+        $chkReq->execute([':email' => $email, ':phone' => $phone]);
+        if ($chkReq->fetch()) {
+            $_SESSION['flash_danger'] = 'A pending or approved admission request with this email or mobile number already exists.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        // Document validations
+        $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+        $maxFileSize = 10 * 1024 * 1024; // 10MB
+        $uploadedDocs = [];
+        $docKeys = ['doc_10th', 'doc_12th', 'doc_tc', 'doc_caste'];
+
+        $docsDir = __DIR__ . '/uploads/documents/';
+        if (!file_exists($docsDir)) {
+            mkdir($docsDir, 0777, true);
+        }
+
+        foreach ($docKeys as $key) {
+            if (isset($_FILES[$key]) && $_FILES[$key]['error'] === UPLOAD_ERR_OK) {
+                $file = $_FILES[$key];
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                if (!in_array($ext, $allowedExtensions)) {
+                    $_SESSION['flash_danger'] = ucwords(str_replace('_', ' ', $key)) . ' must be PDF, JPG, JPEG, or PNG.';
+                    header('Location: index.php?tab=register');
+                    exit;
+                }
+                if ($file['size'] > $maxFileSize) {
+                    $_SESSION['flash_danger'] = ucwords(str_replace('_', ' ', $key)) . ' exceeds the 10MB limit.';
+                    header('Location: index.php?tab=register');
+                    exit;
+                }
+
+                $safeName = 'admission_temp_' . uniqid() . '_' . $key . '.' . $ext;
+                if (move_uploaded_file($file['tmp_name'], $docsDir . $safeName)) {
+                    $uploadedDocs[$key] = $safeName;
+                } else {
+                    $_SESSION['flash_danger'] = 'Failed to upload certificate files.';
+                    header('Location: index.php?tab=register');
+                    exit;
+                }
+            }
+        }
+
+        // Store to session
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $_SESSION['temp_admission_data'] = [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'dob' => $dob,
+            'gender' => $gender,
+            'address' => $address,
+            'department_id' => $department_id,
+            'programme' => $programme,
+            'academic_year' => $academic_year,
+            'password_hash' => $passwordHash,
+            'doc_10th' => $uploadedDocs['doc_10th'] ?? null,
+            'doc_12th' => $uploadedDocs['doc_12th'] ?? null,
+            'doc_tc' => $uploadedDocs['doc_tc'] ?? null,
+            'doc_caste' => $uploadedDocs['doc_caste'] ?? null
+        ];
+
+        // Generate OTP
+        $otp = sprintf("%06d", mt_rand(0, 999999));
+        $_SESSION['registration_otp_hash'] = password_hash($otp, PASSWORD_DEFAULT);
+        $_SESSION['registration_otp_expires_at'] = time() + 600; // 10 minutes
+        $_SESSION['registration_otp_sent_at'] = time();
+        $_SESSION['registration_otp_attempts'] = 0;
+        
+        $_SESSION['otp_screen'] = true;
+        $_SESSION['otp_purpose'] = 'public_registration';
+        $_SESSION['otp_email'] = $email;
+        $_SESSION['otp_name'] = $name;
+
+        try {
+            sendOtpMail($email, $name, $otp, 'registration');
+        } catch (\RuntimeException $mailEx) {
+            $_SESSION['flash_danger'] = 'Failed to send verification email: ' . $mailEx->getMessage();
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        $_SESSION['flash_success'] = 'Registration details verified. Please enter the 6-digit OTP code sent to your email to submit your application.';
+        header('Location: index.php');
+        exit;
+
+    case 'verify_registration_otp':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        $otp = trim($_POST['otp'] ?? '');
+        $tempData = $_SESSION['temp_admission_data'] ?? null;
+        $otpHash = $_SESSION['registration_otp_hash'] ?? '';
+        $expiresAt = $_SESSION['registration_otp_expires_at'] ?? 0;
+        $attempts = $_SESSION['registration_otp_attempts'] ?? 0;
+
+        if (!$tempData || $otpHash === '' || $expiresAt === 0) {
+            $_SESSION['flash_danger'] = 'Registration session expired. Please restart the registration process.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        if (time() > $expiresAt) {
+            $_SESSION['flash_danger'] = 'OTP has expired. Please restart registration.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        if ($attempts >= 5) {
+            $_SESSION['flash_danger'] = 'Maximum verification attempts exceeded. Please restart registration.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        $_SESSION['registration_otp_attempts']++;
+
+        if (!password_verify($otp, $otpHash)) {
+            $rem = 5 - ($attempts + 1);
+            $_SESSION['flash_danger'] = "Invalid OTP code entered. {$rem} attempts remaining.";
+            header('Location: index.php');
+            exit;
+        }
+
+        // OTP is correct! Create Admission Request
+        $insStmt = $db->prepare("
+            INSERT INTO admission_requests 
+            (name, email, phone, dob, gender, address, department_id, programme, academic_year, status, password_hash, doc_10th, doc_12th, doc_tc, doc_caste)
+            VALUES 
+            (:name, :email, :phone, :dob, :gender, :address, :department_id, :programme, :academic_year, 'Pending', :pwd_hash, :doc_10th, :doc_12th, :doc_tc, :doc_caste)
+        ");
+        $insStmt->execute([
+            ':name' => $tempData['name'],
+            ':email' => $tempData['email'],
+            ':phone' => $tempData['phone'],
+            ':dob' => $tempData['dob'],
+            ':gender' => $tempData['gender'],
+            ':address' => $tempData['address'],
+            ':department_id' => $tempData['department_id'],
+            ':programme' => $tempData['programme'],
+            ':academic_year' => $tempData['academic_year'],
+            ':pwd_hash' => $tempData['password_hash'],
+            ':doc_10th' => $tempData['doc_10th'],
+            ':doc_12th' => $tempData['doc_12th'],
+            ':doc_tc' => $tempData['doc_tc'],
+            ':doc_caste' => $tempData['doc_caste']
+        ]);
+
+        $reqId = $db->lastInsertId();
+        logActivity(null, 'admission_request_submitted', "New admission request #{$reqId} submitted by {$tempData['name']}", $db);
+
+        // Clean up OTP sessions
+        unset($_SESSION['temp_admission_data']);
+        unset($_SESSION['registration_otp_hash']);
+        unset($_SESSION['registration_otp_expires_at']);
+        unset($_SESSION['registration_otp_sent_at']);
+        unset($_SESSION['registration_otp_attempts']);
+        unset($_SESSION['otp_screen']);
+        unset($_SESSION['otp_purpose']);
+        unset($_SESSION['otp_email']);
+        unset($_SESSION['otp_name']);
+
+        $_SESSION['flash_success'] = "Application submitted successfully! Your Application ID is #{$reqId}. Keep this ID to check your status.";
+        header('Location: index.php?tab=check_status');
+        exit;
+
+    case 'resend_registration_otp':
+        $tempData = $_SESSION['temp_admission_data'] ?? null;
+        $sentAt = $_SESSION['registration_otp_sent_at'] ?? 0;
+
+        if (!$tempData) {
+            $_SESSION['flash_danger'] = 'Registration session expired. Please restart registration.';
+            header('Location: index.php?tab=register');
+            exit;
+        }
+
+        if ((time() - $sentAt) < 60) {
+            $wait = 60 - (time() - $sentAt);
+            $_SESSION['flash_danger'] = "Please wait {$wait} seconds before requesting a new code.";
+            header('Location: index.php');
+            exit;
+        }
+
+        $otp = sprintf("%06d", mt_rand(0, 999999));
+        $_SESSION['registration_otp_hash'] = password_hash($otp, PASSWORD_DEFAULT);
+        $_SESSION['registration_otp_expires_at'] = time() + 600;
+        $_SESSION['registration_otp_sent_at'] = time();
+        $_SESSION['registration_otp_attempts'] = 0;
+
+        try {
+            sendOtpMail($tempData['email'], $tempData['name'], $otp, 'registration');
+        } catch (\RuntimeException $mailEx) {
+            $_SESSION['flash_danger'] = 'Failed to resend OTP: ' . $mailEx->getMessage();
+            header('Location: index.php');
+            exit;
+        }
+
+        $_SESSION['flash_success'] = 'A new 6-digit OTP verification code has been sent to your email address.';
+        header('Location: index.php');
+        exit;
+
+    case 'query_admission_status':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+
+        if ($email === '' || $phone === '') {
+            $_SESSION['flash_danger'] = 'Registered Email and Mobile Number are required to check status.';
+            header('Location: index.php?tab=check_status');
+            exit;
+        }
+
+        $stmt = $db->prepare("
+            SELECT ar.*, d.name as department_name 
+            FROM admission_requests ar 
+            JOIN departments d ON ar.department_id = d.id 
+            WHERE ar.email = :email AND ar.phone = :phone 
+            ORDER BY ar.id DESC LIMIT 1
+        ");
+        $stmt->execute([':email' => $email, ':phone' => $phone]);
+        $result = $stmt->fetch();
+
+        if ($result) {
+            $_SESSION['status_check_result'] = $result;
+        } else {
+            $_SESSION['flash_danger'] = 'No admission request record found matching the email and phone number.';
+        }
+
+        header('Location: index.php?tab=check_status');
+        exit;
+
+    case 'admin_approve_admission':
+        if ($currentUser['role'] !== 'admin') {
+            $_SESSION['flash_danger'] = 'Unauthorized access.';
+            header('Location: index.php');
+            exit;
+        }
+
+        $reqId = (int)($_POST['request_id'] ?? 0);
+
+        $stmt = $db->prepare("SELECT * FROM admission_requests WHERE id = :id");
+        $stmt->execute([':id' => $reqId]);
+        $request = $stmt->fetch();
+
+        if (!$request || $request['status'] !== 'Pending') {
+            $_SESSION['flash_danger'] = 'Invalid admission request or already processed.';
+            header('Location: index.php?tab=analytics');
+            exit;
+        }
+
+        // Generate Admission Number
+        $admissionNo = 'ADM-2026-' . sprintf("%03d", $reqId);
+
+        // Generate Roll Number
+        $deptStmt = $db->prepare("SELECT code FROM departments WHERE id = :id");
+        $deptStmt->execute([':id' => $request['department_id']]);
+        $deptCode = $deptStmt->fetchColumn() ?: 'CS';
+        $rollNo = $deptCode . '-2026-' . sprintf("%03d", $reqId);
+
+        try {
+            $db->beginTransaction();
+
+            // Create User Account (utilize password hash from registration)
+            $userIns = $db->prepare("
+                INSERT INTO users (name, email, password, role, phone, status, password_changed, activation_status)
+                VALUES (:name, :email, :pwd, 'student', :phone, 'active', 1, 'profile_pending')
+            ");
+            $userIns->execute([
+                ':name' => $request['name'],
+                ':email' => $request['email'],
+                ':pwd' => $request['password_hash'],
+                ':phone' => $request['phone']
+            ]);
+
+            $newUserId = $db->lastInsertId();
+
+            // Create Student Profile
+            $profileIns = $db->prepare("
+                INSERT INTO student_profiles (user_id, roll_no, department_id, year, semester, cgpa, dob, address, admission_no, programme, section)
+                VALUES (:user_id, :roll_no, :dept_id, 1, 1, 0.00, :dob, :address, :admission_no, :programme, 'A')
+            ");
+            $profileIns->execute([
+                ':user_id' => $newUserId,
+                ':roll_no' => $rollNo,
+                ':dept_id' => $request['department_id'],
+                ':dob' => $request['dob'],
+                ':address' => $request['address'],
+                ':admission_no' => $admissionNo,
+                ':programme' => $request['programme']
+            ]);
+
+            $newProfileId = $db->lastInsertId();
+
+            // Save documents to student_documents
+            $docMap = [
+                'doc_10th' => '10th_certificate',
+                'doc_12th' => 'plus_two_certificate',
+                'doc_tc' => 'transfer_certificate',
+                'doc_caste' => 'caste_certificate'
+            ];
+
+            foreach ($docMap as $reqKey => $docType) {
+                if ($request[$reqKey]) {
+                    $docStmt = $db->prepare("
+                        INSERT INTO student_documents (student_profile_id, document_type, file_path, uploaded_at)
+                        VALUES (:student_id, :doc_type, :file_path, NOW())
+                    ");
+                    $docStmt->execute([
+                        ':student_id' => $newProfileId,
+                        ':doc_type' => $docType,
+                        ':file_path' => $request[$reqKey]
+                    ]);
+                }
+            }
+
+            // Update Admission Request status
+            $upReq = $db->prepare("UPDATE admission_requests SET status = 'Approved', remarks = 'Approved by administrator' WHERE id = :id");
+            $upReq->execute([':id' => $reqId]);
+
+            $db->commit();
+
+            // Send Welcome Email (non-fatal — approval already committed)
+            try {
+                sendWelcomeEmail($request['email'], $request['name'], $admissionNo);
+            } catch (\RuntimeException $mailEx) {
+                // Log but don't roll back — the student account was already created
+                $_SESSION['flash_warning'] = 'Admission approved but welcome email failed: ' . $mailEx->getMessage();
+            }
+
+            logActivity($currentUser['id'], 'admission_approved', "Approved admission request #{$reqId}. Created Admission No: {$admissionNo}", $db);
+
+            $_SESSION['flash_success'] = "Admission request approved! Welcome email dispatched to {$request['email']}. Admission No: {$admissionNo}";
+        } catch (Exception $e) {
+            $db->rollBack();
+            $_SESSION['flash_danger'] = 'Error processing admission approval: ' . $e->getMessage();
+        }
+
+        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php?tab=analytics'));
+        exit;
+
+    case 'admin_reject_admission':
+        if ($currentUser['role'] !== 'admin') {
+            $_SESSION['flash_danger'] = 'Unauthorized access.';
+            header('Location: index.php');
+            exit;
+        }
+
+        $reqId = (int)($_POST['request_id'] ?? 0);
+        $remarks = trim($_POST['remarks'] ?? '');
+
+        if ($reqId <= 0 || $remarks === '') {
+            $_SESSION['flash_danger'] = 'Reason/remarks are required to reject an application.';
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php?tab=analytics'));
+            exit;
+        }
+
+        $upReq = $db->prepare("UPDATE admission_requests SET status = 'Rejected', remarks = :remarks WHERE id = :id");
+        $upReq->execute([':remarks' => $remarks, ':id' => $reqId]);
+
+        logActivity($currentUser['id'], 'admission_rejected', "Rejected admission request #{$reqId}. Remarks: {$remarks}", $db);
+
+        $_SESSION['flash_success'] = "Admission request rejected successfully with remarks.";
+        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php?tab=analytics'));
+        exit;
+
+    case 'verify_forgot_password':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        $role = trim($_POST['role'] ?? '');
+        $identifier = trim($_POST['identifier'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+
+        if ($role === '' || $identifier === '' || $email === '') {
+            $_SESSION['flash_danger'] = 'All fields are required to request password reset.';
+            header('Location: index.php?tab=forgot');
+            exit;
+        }
+
+        // Look up
+        $user = null;
+        if ($role === 'student') {
+            $stmt = $db->prepare("
+                SELECT u.* 
+                FROM users u
+                JOIN student_profiles sp ON u.id = sp.user_id
+                WHERE u.role = 'student' AND sp.admission_no = :id AND u.email = :email
+            ");
+            $stmt->execute([':id' => $identifier, ':email' => $email]);
+            $user = $stmt->fetch();
+        } elseif ($role === 'teacher') {
+            $stmt = $db->prepare("
+                SELECT u.* 
+                FROM users u
+                JOIN teacher_profiles tp ON u.id = tp.user_id
+                WHERE u.role = 'teacher' AND tp.employee_id = :id AND u.email = :email
+            ");
+            $stmt->execute([':id' => $identifier, ':email' => $email]);
+            $user = $stmt->fetch();
+        }
+
+        if (!$user) {
+            $_SESSION['flash_danger'] = 'Mismatched details: No active account matches the identifier and registered email.';
+            header('Location: index.php?tab=forgot');
+            exit;
+        }
+
+        // Generate OTP
+        $otp = sprintf("%06d", mt_rand(0, 999999));
+        $otpHash = password_hash($otp, PASSWORD_DEFAULT);
+        $expiry = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+
+        $upStmt = $db->prepare("
+            UPDATE users 
+            SET otp_hash = :hash, 
+                otp_expires_at = :expires, 
+                otp_attempts = 0, 
+                otp_sent_at = NOW() 
+            WHERE id = :id
+        ");
+        $upStmt->execute([
+            ':hash' => $otpHash,
+            ':expires' => $expiry,
+            ':id' => $user['id']
+        ]);
+
+        try {
+            sendOtpMail($email, $user['name'], $otp, 'reset');
+        } catch (\RuntimeException $mailEx) {
+            $_SESSION['flash_danger'] = 'Failed to send password reset email: ' . $mailEx->getMessage();
+            header('Location: index.php?tab=forgot');
+            exit;
+        }
+        logActivity($user['id'], 'forgot_password_otp_sent', "OTP sent for password reset verification to {$email}", $db);
+
+        $_SESSION['otp_verify_user_id'] = $user['id'];
+        $_SESSION['otp_purpose'] = 'reset';
+        $_SESSION['otp_screen'] = true;
+        $_SESSION['otp_role'] = $role;
+        $_SESSION['otp_identifier'] = $identifier;
+        $_SESSION['otp_email'] = $email;
+        $_SESSION['otp_name'] = $user['name'];
+
+        $_SESSION['flash_success'] = 'Verification successful! A 6-digit OTP code has been dispatched to reset your password.';
+        header('Location: index.php');
+        exit;
+
+    case 'verify_otp':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        $userId = $_SESSION['otp_verify_user_id'] ?? 0;
+        $purpose = $_SESSION['otp_purpose'] ?? '';
+        $otp = trim($_POST['otp'] ?? '');
+
+        if ($userId <= 0 || $purpose === '' || $otp === '') {
+            $_SESSION['flash_danger'] = 'Session timed out or fields empty. Please restart password reset.';
+            header('Location: index.php');
+            exit;
+        }
+
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt->execute([':id' => $userId]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            $_SESSION['flash_danger'] = 'User account record not found.';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Check attempts limit
+        if ((int)$user['otp_attempts'] >= 5) {
+            $_SESSION['flash_danger'] = 'Maximum verification attempts reached (5/5). Please request a new OTP code.';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Check expiration
+        if (strtotime($user['otp_expires_at']) < time()) {
+            $_SESSION['flash_danger'] = 'The OTP code has expired (10-minute limit). Please request a new one.';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Increment attempts
+        $incStmt = $db->prepare("UPDATE users SET otp_attempts = otp_attempts + 1 WHERE id = :id");
+        $incStmt->execute([':id' => $userId]);
+
+        // Verify hash
+        if (!password_verify($otp, $user['otp_hash'])) {
+            $remaining = 5 - ($user['otp_attempts'] + 1);
+            $_SESSION['flash_danger'] = "Invalid OTP code entered. {$remaining} attempts remaining.";
+            header('Location: index.php');
+            exit;
+        }
+
+        // OTP Verified successfully
+        $_SESSION['otp_verified'] = true;
+        $_SESSION['otp_screen'] = false;
+        $_SESSION['password_setup_screen'] = true;
+
+        $_SESSION['flash_success'] = 'OTP verified successfully! Please define your security password.';
+        header('Location: index.php');
+        exit;
+
+    case 'resend_otp':
+        $userId = $_SESSION['otp_verify_user_id'] ?? 0;
+        $purpose = $_SESSION['otp_purpose'] ?? '';
+        
+        if ($userId <= 0 || $purpose === '') {
+            $_SESSION['flash_danger'] = 'No active verification session. Please restart details verification.';
+            header('Location: index.php');
+            exit;
+        }
+
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt->execute([':id' => $userId]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            $_SESSION['flash_danger'] = 'User not found.';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Verify 60 seconds resend interval
+        if ($user['otp_sent_at'] && (time() - strtotime($user['otp_sent_at'])) < 60) {
+            $wait = 60 - (time() - strtotime($user['otp_sent_at']));
+            $_SESSION['flash_danger'] = "Please wait {$wait} seconds before resending OTP.";
+            header('Location: index.php');
+            exit;
+        }
+
+        $otp = sprintf("%06d", mt_rand(0, 999999));
+        $otpHash = password_hash($otp, PASSWORD_DEFAULT);
+        $expiry = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+
+        $upStmt = $db->prepare("
+            UPDATE users 
+            SET otp_hash = :hash, 
+                otp_expires_at = :expires, 
+                otp_attempts = 0, 
+                otp_sent_at = NOW() 
+            WHERE id = :id
+        ");
+        $upStmt->execute([
+            ':hash' => $otpHash,
+            ':expires' => $expiry,
+            ':id' => $userId
+        ]);
+
+        try {
+            sendOtpMail($user['email'], $user['name'], $otp, $purpose);
+        } catch (\RuntimeException $mailEx) {
+            $_SESSION['flash_danger'] = 'Failed to resend OTP: ' . $mailEx->getMessage();
+            header('Location: index.php');
+            exit;
+        }
+        logActivity($userId, 'otp_resent', "Resent OTP verification code to {$user['email']}", $db);
+
+        $_SESSION['flash_success'] = 'A new 6-digit OTP code has been dispatched to your email address.';
+        header('Location: index.php');
+        exit;
+
+    case 'setup_registered_password':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        $userId = $_SESSION['otp_verify_user_id'] ?? 0;
+        $otpVerified = $_SESSION['otp_verified'] ?? false;
+        $purpose = $_SESSION['otp_purpose'] ?? '';
+        
+        $newPassword = trim($_POST['new_password'] ?? '');
+        $confirmPassword = trim($_POST['confirm_password'] ?? '');
+
+        if ($userId <= 0 || !$otpVerified || $purpose === '') {
+            $_SESSION['flash_danger'] = 'Session expired. Please verify your details again.';
+            header('Location: index.php');
+            exit;
+        }
+
+        if ($newPassword === '' || $confirmPassword === '') {
+            $_SESSION['flash_danger'] = 'Password fields are required.';
+            header('Location: index.php');
+            exit;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['flash_danger'] = 'Passwords do not match.';
+            header('Location: index.php');
+            exit;
+        }
+
+        if (strlen($newPassword) < 6) {
+            $_SESSION['flash_danger'] = 'Password must be at least 6 characters.';
+            header('Location: index.php');
+            exit;
+        }
+
+        $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        if ($purpose === 'registration') {
+            $upStmt = $db->prepare("
+                UPDATE users 
+                SET password = :pwd, 
+                    status = 'active', 
+                    activation_status = 'profile_pending', 
+                    password_changed = 1,
+                    otp_hash = NULL,
+                    otp_expires_at = NULL,
+                    otp_attempts = 0
+                WHERE id = :id
+            ");
+            $upStmt->execute([':pwd' => $hashed, ':id' => $userId]);
+            logActivity($userId, 'registration_password_setup', "User completed OTP registration and set password", $db);
+            $_SESSION['flash_success'] = 'Account activated successfully! Please sign in with your new password to complete your profile.';
+        } elseif ($purpose === 'reset') {
+            $upStmt = $db->prepare("
+                UPDATE users 
+                SET password = :pwd, 
+                    otp_hash = NULL,
+                    otp_expires_at = NULL,
+                    otp_attempts = 0
+                WHERE id = :id
+            ");
+            $upStmt->execute([':pwd' => $hashed, ':id' => $userId]);
+            logActivity($userId, 'forgot_password_reset', "User reset their password via OTP validation", $db);
+            $_SESSION['flash_success'] = 'Your password has been reset successfully! Please sign in.';
+        }
+
+        // Clean session
+        unset($_SESSION['otp_verify_user_id']);
+        unset($_SESSION['otp_purpose']);
+        unset($_SESSION['otp_verified']);
+        unset($_SESSION['otp_screen']);
+        unset($_SESSION['password_setup_screen']);
+        unset($_SESSION['otp_role']);
+        unset($_SESSION['otp_identifier']);
+        unset($_SESSION['otp_email']);
+        unset($_SESSION['otp_name']);
+
+        header('Location: index.php');
+        exit;
+
+    case 'cancel_verification':
+        unset($_SESSION['otp_verify_user_id']);
+        unset($_SESSION['otp_purpose']);
+        unset($_SESSION['otp_verified']);
+        unset($_SESSION['otp_screen']);
+        unset($_SESSION['password_setup_screen']);
+        unset($_SESSION['otp_role']);
+        unset($_SESSION['otp_identifier']);
+        unset($_SESSION['otp_email']);
+        unset($_SESSION['otp_name']);
         header('Location: index.php');
         exit;
 

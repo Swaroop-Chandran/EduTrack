@@ -1,0 +1,5 @@
+-- migration_otp.sql
+ALTER TABLE users ADD COLUMN otp_hash VARCHAR(255) NULL;
+ALTER TABLE users ADD COLUMN otp_expires_at TIMESTAMP NULL;
+ALTER TABLE users ADD COLUMN otp_attempts INT DEFAULT 0;
+ALTER TABLE users ADD COLUMN otp_sent_at TIMESTAMP NULL;

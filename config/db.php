@@ -33,6 +33,9 @@ class Database {
                     // Strip quotes if any
                     $value = trim($value, "\"'");
                     
+                    $_ENV[$key] = $value;
+                    putenv("{$key}={$value}");
+                    
                     switch ($key) {
                         case 'DB_HOST':
                             $host = $value;

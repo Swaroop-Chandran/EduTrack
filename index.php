@@ -7,6 +7,22 @@ require_once __DIR__ . '/includes/helpers.php';
 
 $db = Database::connect();
 
+// 1.5 Handle Activation Token Routing
+if (isset($_GET['action']) && $_GET['action'] === 'activate') {
+    $token = trim($_GET['token'] ?? '');
+    
+    // Look up token validity
+    $tokenUser = null;
+    if ($token !== '') {
+        $stmt = $db->prepare("SELECT * FROM users WHERE activation_token = :token AND token_expires_at > NOW()");
+        $stmt->execute([':token' => $token]);
+        $tokenUser = $stmt->fetch();
+    }
+    
+    include __DIR__ . '/views/activate_account_view.php';
+    exit;
+}
+
 // 1. Authentication Check
 $currentUser = null;
 if (isset($_SESSION['user_id'])) {
@@ -67,6 +83,7 @@ function getPageTitle(string $tab, string $role): string {
         'placements'        => 'Strategic Placement Cell recruitment',
         'profile'           => 'My Institutional Profile details',
         'students'          => 'Students Admissions and Roll configuration',
+        'admissions'        => 'Admissions Request Applications Review',
         'teachers'          => 'Faculty Professor and Instructor schedules',
         'departments'       => 'Academic bodies & sectors settings',
         'announcements'     => 'Push updates broadcaster',
