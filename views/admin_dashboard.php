@@ -45,7 +45,7 @@ $allTeachers = $teachersStmt->fetchAll();
 
 // Fetch students
 $studentsStmt = $db->query("
-    SELECT u.*, sp.roll_no, sp.cgpa, sp.department_id, sp.year, sp.semester, sp.dob, sp.address, d.name as department_name, d.code as department_code 
+    SELECT u.*, sp.roll_no, sp.cgpa, sp.department_id, sp.year, sp.semester, sp.dob, sp.address, sp.admission_no, sp.programme, sp.section, sp.is_archived, d.name as department_name, d.code as department_code 
     FROM users u 
     JOIN student_profiles sp ON u.id = sp.user_id 
     LEFT JOIN departments d ON sp.department_id = d.id 
@@ -189,6 +189,43 @@ $allStudents = $studentsStmt->fetchAll();
             </div>
         </form>
 
+        <!-- Batch Promotion Control Panel -->
+        <div class="bg-white border border-[#E2E8F0] rounded-xl p-5 shadow-sm space-y-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="chevrons-up" class="w-5 h-5 text-[#2563EB]"></i>
+                <h3 class="text-sm font-extrabold text-[#0F172A]">Batch Promotions & Graduations</h3>
+            </div>
+            <p class="text-slate-500 text-[11px] font-medium leading-relaxed">
+                Promote a specific cohort of students to the next semester. Note: 8th Semester students will be marked as graduated, archived, and set to inactive.
+            </p>
+            <form action="actions.php?action=promote_students" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div>
+                    <label class="block text-slate-500 text-[10px] uppercase font-bold mb-1">Select Department</label>
+                    <select name="department_id" class="w-full bg-white border border-[#E2E8F0] p-2.5 rounded-lg text-xs font-bold text-slate-700" required>
+                        <option value="">-- Choose Department --</option>
+                        <?php foreach ($departmentsList as $d): ?>
+                            <option value="<?php echo $d['id']; ?>"><?php echo htmlspecialchars($d['name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-500 text-[10px] uppercase font-bold mb-1">Current Semester to Promote</label>
+                    <select name="semester_filter" class="w-full bg-white border border-[#E2E8F0] p-2.5 rounded-lg text-xs font-bold text-slate-700" required>
+                        <option value="">-- Choose Semester --</option>
+                        <?php for ($s = 1; $s <= 8; $s++): ?>
+                            <option value="<?php echo $s; ?>">Semester <?php echo $s; ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" onclick="return confirm('Are you sure you want to promote all students of the selected semester in this department?')" class="w-full py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg transition-transform active:scale-95 cursor-pointer flex items-center justify-center gap-2">
+                        <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                        <span>Execute Batch Promotion</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <!-- Students list table -->
         <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
@@ -196,28 +233,60 @@ $allStudents = $studentsStmt->fetchAll();
                     <thead>
                         <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0] text-slate-500 font-mono uppercase text-[10px]">
                             <th class="p-4">NAME & ADMISSION INDEX</th>
-                            <th class="p-4">ROLL / INDIVIDUAL KEY</th>
-                            <th class="p-4">DEPARTMENT</th>
+                            <th class="p-4">ROLL / PROGRAMME / SECTION</th>
+                            <th class="p-4">DEPARTMENT / TERM</th>
                             <th class="p-4 text-center">CGPA</th>
+                            <th class="p-4 text-center">STATUS</th>
                             <th class="p-4 text-right">CONTROLS</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 font-medium font-mono">
                         <?php foreach ($filteredStudents as $su): ?>
-                            <tr class="hover:bg-slate-50/30">
+                            <tr class="hover:bg-slate-50/30 <?php echo $su['is_archived'] ? 'opacity-60 bg-gray-50/20' : ''; ?>">
                                 <td class="p-4 flex items-center gap-3 font-sans">
                                     <img src="<?php echo htmlspecialchars($su['avatar']); ?>" alt="Avatar" class="w-8 h-8 rounded-full border border-slate-100 object-cover" />
                                     <div>
                                         <span class="font-extrabold text-[#0F172A] block"><?php echo htmlspecialchars($su['name']); ?></span>
-                                        <span class="text-[10px] text-slate-400 font-mono"><?php echo htmlspecialchars($su['email']); ?></span>
+                                        <span class="text-[10px] text-slate-400 font-mono block">Email: <?php echo htmlspecialchars($su['email']); ?></span>
+                                        <span class="text-[9px] text-[#2563EB] font-bold uppercase tracking-wider block">Adm No: <?php echo htmlspecialchars($su['admission_no'] ?: 'None'); ?></span>
                                     </div>
                                 </td>
-                                <td class="p-4"><?php echo htmlspecialchars($su['roll_no']); ?></td>
-                                <td class="p-4 font-sans text-slate-700"><?php echo htmlspecialchars($su['department_name'] ?? 'Unassigned'); ?></td>
+                                <td class="p-4">
+                                    <span class="block"><?php echo htmlspecialchars($su['roll_no']); ?></span>
+                                    <span class="text-[10px] text-slate-500 font-sans block"><?php echo htmlspecialchars($su['programme'] ?: 'None'); ?> • Sec <?php echo htmlspecialchars($su['section'] ?: 'None'); ?></span>
+                                </td>
+                                <td class="p-4 font-sans text-slate-700">
+                                    <span class="block"><?php echo htmlspecialchars($su['department_name'] ?? 'Unassigned'); ?></span>
+                                    <span class="text-[10px] text-slate-400 font-mono block">Year <?php echo $su['year']; ?> • Sem <?php echo $su['semester']; ?></span>
+                                </td>
                                 <td class="p-4 text-center text-[#2563EB] font-black"><?php echo number_format($su['cgpa'], 2); ?></td>
-                                <td class="p-4 text-right space-x-2 font-sans">
-                                    <button onclick="openEditStudentModal(<?php echo $su['id']; ?>, '<?php echo htmlspecialchars(addslashes($su['name'])); ?>', '<?php echo htmlspecialchars(addslashes($su['email'])); ?>', '<?php echo htmlspecialchars($su['phone']); ?>', '<?php echo htmlspecialchars($su['roll_no']); ?>', <?php echo $su['department_id']; ?>, <?php echo $su['year']; ?>, <?php echo $su['semester']; ?>, '<?php echo $su['dob']; ?>', '<?php echo htmlspecialchars(addslashes($su['address'])); ?>');" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
-                                    <a href="actions.php?action=delete_student&user_id=<?php echo $su['id']; ?>" onclick="return confirm('Confirm physical deletion of student account \'<?php echo htmlspecialchars(addslashes($su['name'])); ?>\' from repository files?')" class="text-xs font-bold text-red-600 hover:underline cursor-pointer">Remove</a>
+                                <td class="p-4 text-center font-sans">
+                                    <div class="flex flex-col items-center gap-1">
+                                        <?php if ($su['is_archived']): ?>
+                                            <span class="px-2 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded text-[9px] font-bold uppercase">Archived</span>
+                                        <?php endif; ?>
+                                        <a href="actions.php?action=toggle_user_status&user_id=<?php echo $su['id']; ?>&status=<?php echo $su['status'] === 'active' ? 'inactive' : 'active'; ?>" class="hover:opacity-80 transition-opacity" title="Click to Toggle Status">
+                                            <?php 
+                                            $actStat = $su['activation_status'] ?? 'inactive';
+                                            if ($su['status'] === 'inactive' && $actStat === 'active') {
+                                                echo '<span class="px-2 py-0.5 bg-red-50 text-red-600 border border-red-100 rounded text-[9px] font-bold uppercase">Deactivated</span>';
+                                            } else {
+                                                if ($actStat === 'inactive') {
+                                                    echo '<span class="px-2 py-0.5 bg-slate-50 text-slate-500 border border-slate-100 rounded text-[9px] font-bold uppercase">Inactive</span>';
+                                                } elseif ($actStat === 'profile_pending') {
+                                                    echo '<span class="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded text-[9px] font-bold uppercase">Profile Pending</span>';
+                                                } else {
+                                                    echo '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded text-[9px] font-bold uppercase">Active</span>';
+                                                }
+                                            }
+                                            ?>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td class="p-4 text-right space-x-2 font-sans whitespace-nowrap">
+                                    <a href="actions.php?action=reset_password&user_id=<?php echo $su['id']; ?>" onclick="return confirm('Reset password for student \'<?php echo htmlspecialchars(addslashes($su['name'])); ?>\'?')" class="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Reset Pw</a>
+                                    <button onclick="openEditStudentModal(<?php echo $su['id']; ?>, '<?php echo htmlspecialchars(addslashes($su['name'])); ?>', '<?php echo htmlspecialchars(addslashes($su['email'])); ?>', '<?php echo htmlspecialchars($su['phone']); ?>', '<?php echo htmlspecialchars($su['roll_no']); ?>', <?php echo $su['department_id']; ?>, <?php echo $su['year']; ?>, <?php echo $su['semester']; ?>, '<?php echo $su['dob']; ?>', '<?php echo htmlspecialchars(addslashes($su['address'])); ?>', '<?php echo htmlspecialchars(addslashes($su['admission_no'])); ?>', '<?php echo htmlspecialchars(addslashes($su['programme'])); ?>', '<?php echo htmlspecialchars(addslashes($su['section'])); ?>');" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
+                                    <a href="actions.php?action=delete_student&user_id=<?php echo $su['id']; ?>" onclick="return confirm('Confirm physical deletion of student account \'<?php echo htmlspecialchars(addslashes($su['name'])); ?>\'?')" class="text-xs font-bold text-red-600 hover:underline cursor-pointer">Remove</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -258,18 +327,37 @@ $allStudents = $studentsStmt->fetchAll();
                     </div>
                 </div>
 
+                <div id="student_password_container">
+                    <label class="block text-slate-500 mb-1">Account Login Password</label>
+                    <input type="password" name="password" id="stu_password" placeholder="Leave blank to default to Roll Number (Admission Number)" class="w-full border p-2 rounded text-xs focus:ring-1 focus:ring-blue-500" />
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-slate-500 mb-1">Institutional Roll Number</label>
-                        <input type="text" name="roll_no" id="stu_roll" placeholder="RSET-CS-101" class="w-full border p-2 rounded focus:ring-1 text-xs" required />
+                        <input type="text" name="roll_no" id="stu_roll" class="w-full border p-2 rounded text-xs" required />
                     </div>
                     <div>
-                        <label class="block text-slate-500 mb-1">Select Department sector</label>
+                        <label class="block text-slate-500 mb-1">Select Department</label>
                         <select name="department_id" id="stu_dept" class="w-full border p-2 rounded bg-white text-slate-700 text-xs">
                             <?php foreach ($departmentsList as $d): ?>
                                 <option value="<?php echo $d['id']; ?>"><?php echo htmlspecialchars($d['name']); ?></option>
                             <?php endforeach; ?>
                         </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Admission Number</label>
+                        <input type="text" name="admission_no" id="stu_admission_no" placeholder="e.g. ADM-2026-001" class="w-full border p-2 rounded text-xs" />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Programme</label>
+                        <input type="text" name="programme" id="stu_programme" placeholder="e.g. B.Tech" class="w-full border p-2 rounded text-xs" />
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">Section/Batch</label>
+                        <input type="text" name="section" id="stu_section" placeholder="e.g. A" class="w-full border p-2 rounded text-xs" />
                     </div>
                 </div>
 
@@ -310,26 +398,35 @@ $allStudents = $studentsStmt->fetchAll();
             document.getElementById('stu_email').value = "";
             document.getElementById('stu_phone').value = "";
             document.getElementById('stu_roll').value = "";
+            document.getElementById('stu_admission_no').value = "";
+            document.getElementById('stu_programme').value = "B.Tech";
+            document.getElementById('stu_section').value = "A";
             document.getElementById('stu_year').value = "1";
             document.getElementById('stu_sem').value = "1";
             document.getElementById('stu_dob').value = "";
             document.getElementById('stu_address').value = "";
+            document.getElementById('stu_password').value = "";
+            document.getElementById('student_password_container').classList.remove('hidden');
             document.getElementById('student_modal_title').innerText = "Admit Student Scholar Profile";
             document.getElementById('student_modal').classList.remove('hidden');
             lockBackgroundScroll();
         }
-        function openEditStudentModal(id, name, email, phone, roll, deptId, year, sem, dob, address) {
+        function openEditStudentModal(id, name, email, phone, roll, deptId, year, sem, dob, address, admissionNo, programme, section) {
             document.getElementById('student_form').action = "actions.php?action=edit_student";
             document.getElementById('stu_user_id').value = id;
             document.getElementById('stu_name').value = name;
             document.getElementById('stu_email').value = email;
             document.getElementById('stu_phone').value = phone;
             document.getElementById('stu_roll').value = roll;
+            document.getElementById('stu_admission_no').value = admissionNo || "";
+            document.getElementById('stu_programme').value = programme || "B.Tech";
+            document.getElementById('stu_section').value = section || "A";
             document.getElementById('stu_dept').value = deptId;
             document.getElementById('stu_year').value = year;
             document.getElementById('stu_sem').value = sem;
             document.getElementById('stu_dob').value = dob;
             document.getElementById('stu_address').value = address;
+            document.getElementById('student_password_container').classList.add('hidden');
             document.getElementById('student_modal_title').innerText = "Modify Student Scholar details";
             document.getElementById('student_modal').classList.remove('hidden');
             lockBackgroundScroll();
@@ -397,6 +494,7 @@ $allStudents = $studentsStmt->fetchAll();
                             <th class="p-4">EMPLOYEE ID / BADGE</th>
                             <th class="p-4">DESIGNATION</th>
                             <th class="p-4">DEPT / CREDENTIALS</th>
+                            <th class="p-4 text-center">STATUS</th>
                             <th class="p-4 text-right">CONTROLS</th>
                         </tr>
                     </thead>
@@ -413,7 +511,26 @@ $allStudents = $studentsStmt->fetchAll();
                                 <td class="p-4"><?php echo htmlspecialchars($tu['employee_id']); ?></td>
                                 <td class="p-4 text-slate-600"><?php echo htmlspecialchars($tu['designation']); ?></td>
                                 <td class="p-4 font-sans text-slate-700"><?php echo htmlspecialchars($tu['department_name'] ?? 'Unassigned'); ?></td>
-                                <td class="p-4 text-right space-x-2 font-sans">
+                                <td class="p-4 text-center font-sans">
+                                    <a href="actions.php?action=toggle_user_status&user_id=<?php echo $tu['id']; ?>&status=<?php echo $tu['status'] === 'active' ? 'inactive' : 'active'; ?>" class="hover:opacity-80 transition-opacity" title="Click to Toggle Status">
+                                        <?php 
+                                        $actStat = $tu['activation_status'] ?? 'inactive';
+                                        if ($tu['status'] === 'inactive' && $actStat === 'active') {
+                                            echo '<span class="px-2 py-0.5 bg-red-50 text-red-600 border border-red-100 rounded text-[9px] font-bold uppercase">Deactivated</span>';
+                                        } else {
+                                            if ($actStat === 'inactive') {
+                                                echo '<span class="px-2 py-0.5 bg-slate-50 text-slate-500 border border-slate-100 rounded text-[9px] font-bold uppercase">Inactive</span>';
+                                            } elseif ($actStat === 'profile_pending') {
+                                                echo '<span class="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 rounded text-[9px] font-bold uppercase">Profile Pending</span>';
+                                            } else {
+                                                echo '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded text-[9px] font-bold uppercase">Active</span>';
+                                            }
+                                        }
+                                        ?>
+                                    </a>
+                                </td>
+                                <td class="p-4 text-right space-x-2 font-sans whitespace-nowrap">
+                                    <a href="actions.php?action=reset_password&user_id=<?php echo $tu['id']; ?>" onclick="return confirm('Reset password for teacher \'<?php echo htmlspecialchars(addslashes($tu['name'])); ?>\'?')" class="text-xs font-bold text-amber-700 hover:underline cursor-pointer">Reset Pw</a>
                                     <button onclick="openEditTeacherModal(<?php echo $tu['id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['name'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['email'])); ?>', '<?php echo htmlspecialchars($tu['phone']); ?>', '<?php echo htmlspecialchars($tu['employee_id']); ?>', <?php echo $tu['department_id']; ?>, '<?php echo htmlspecialchars(addslashes($tu['designation'])); ?>', '<?php echo htmlspecialchars(addslashes($tu['qualification'])); ?>');" class="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer">Modify</button>
                                     <a href="actions.php?action=delete_teacher&user_id=<?php echo $tu['id']; ?>" onclick="return confirm('Confirm physical deletion of instructor \'<?php echo htmlspecialchars(addslashes($tu['name'])); ?>\' from global registry?')" class="text-xs font-bold text-red-600 hover:underline cursor-pointer">Remove</a>
                                 </td>
@@ -454,6 +571,11 @@ $allStudents = $studentsStmt->fetchAll();
                         <label class="block text-slate-500 mb-1">Mobile Contact Phone</label>
                         <input type="text" name="phone" id="tea_phone" class="w-full border p-2 rounded text-xs" />
                     </div>
+                </div>
+
+                <div id="teacher_password_container">
+                    <label class="block text-slate-500 mb-1">Account Login Password</label>
+                    <input type="password" name="password" id="tea_password" placeholder="Leave blank to default to Employee ID" class="w-full border p-2 rounded text-xs focus:ring-1 focus:ring-blue-500" />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -501,6 +623,8 @@ $allStudents = $studentsStmt->fetchAll();
             document.getElementById('tea_empid').value = "";
             document.getElementById('tea_desig').value = "Assistant Professor";
             document.getElementById('tea_qual').value = "M.Tech, Ph.D";
+            document.getElementById('tea_password').value = "";
+            document.getElementById('teacher_password_container').classList.remove('hidden');
             document.getElementById('teacher_modal_title').innerText = "Appoint Faculty Professor";
             document.getElementById('teacher_modal').classList.remove('hidden');
             lockBackgroundScroll();
@@ -515,6 +639,7 @@ $allStudents = $studentsStmt->fetchAll();
             document.getElementById('tea_dept').value = deptId;
             document.getElementById('tea_desig').value = designation;
             document.getElementById('tea_qual').value = qualification;
+            document.getElementById('teacher_password_container').classList.add('hidden');
             document.getElementById('teacher_modal_title').innerText = "Modify Faculty details";
             document.getElementById('teacher_modal').classList.remove('hidden');
             lockBackgroundScroll();

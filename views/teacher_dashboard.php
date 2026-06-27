@@ -816,30 +816,155 @@ if (!empty($teacherCourseIds)) {
             </div>
         </div>
 
-        <form action="actions.php?action=edit_profile" method="POST" class="space-y-4 text-xs font-bold">
-            <div>
-                <label class="block text-slate-500 mb-1">Official Instructor Email</label>
-                <input type="email" value="<?php echo htmlspecialchars($currentUser['email']); ?>" class="w-full border p-2.5 rounded bg-gray-50 text-gray-500" readonly />
+        <?php if ($forceProfileCompletion ?? false): ?>
+            <div class="p-4 mb-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs flex items-start gap-3">
+                <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600"></i>
+                <div>
+                    <p class="font-extrabold uppercase tracking-wider mb-1">First-Time Profile Setup Required</p>
+                    <p class="font-semibold leading-relaxed text-slate-600">Please fill out all personal, experience, and contact details below, and upload any required certificates. Your dashboard access will remain locked until this profile form is completed and saved.</p>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <form action="actions.php?action=edit_profile" method="POST" enctype="multipart/form-data" class="space-y-4 text-xs font-bold">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-slate-500 mb-1">Official Instructor Email (Read-only)</label>
+                    <input type="email" value="<?php echo htmlspecialchars($currentUser['email']); ?>" class="w-full border p-2.5 rounded bg-gray-50 text-gray-400 cursor-not-allowed" readonly />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Personal Contact Email</label>
+                    <input type="email" name="personal_email" value="<?php echo htmlspecialchars($teacherProfile['personal_email'] ?? ''); ?>" placeholder="e.g. name@gmail.com" class="w-full border p-2.5 rounded focus:ring-1 focus:ring-blue-500" />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Mobile Contact Phone *</label>
+                    <input type="text" name="phone" value="<?php echo htmlspecialchars($currentUser['phone'] ?? ''); ?>" class="w-full border p-2.5 rounded focus:ring-1 focus:ring-blue-500" required />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-slate-500 mb-1">Academic Qualifications (Read-only)</label>
+                    <input type="text" value="<?php echo htmlspecialchars($teacherProfile['qualification'] ?? ''); ?>" class="w-full border p-2.5 rounded bg-gray-50 text-gray-400 cursor-not-allowed" readonly />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Academic Department Sector (Read-only)</label>
+                    <input type="text" value="<?php echo htmlspecialchars($teacherProfile['department_name'] ?? ''); ?>" class="w-full border p-2.5 rounded bg-gray-50 text-gray-400 cursor-not-allowed" readonly />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-slate-500 mb-1">Gender</label>
+                    <select name="gender" class="w-full border p-2.5 rounded bg-white text-slate-700">
+                        <option value="">Select Gender</option>
+                        <option value="Male" <?php echo ($teacherProfile['gender'] ?? '') === 'Male' ? 'selected' : ''; ?>>Male</option>
+                        <option value="Female" <?php echo ($teacherProfile['gender'] ?? '') === 'Female' ? 'selected' : ''; ?>>Female</option>
+                        <option value="Other" <?php echo ($teacherProfile['gender'] ?? '') === 'Other' ? 'selected' : ''; ?>>Other</option>
+                        <option value="Prefer not to say" <?php echo ($teacherProfile['gender'] ?? '') === 'Prefer not to say' ? 'selected' : ''; ?>>Prefer not to say</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Date of Birth</label>
+                    <input type="date" name="dob" value="<?php echo htmlspecialchars($teacherProfile['dob'] ?? ''); ?>" class="w-full border p-2.5 rounded font-mono" />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Blood Group</label>
+                    <input type="text" name="blood_group" value="<?php echo htmlspecialchars($teacherProfile['blood_group'] ?? ''); ?>" placeholder="e.g. O+, A-" class="w-full border p-2.5 rounded font-mono" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-slate-500 mb-1">Aadhaar Number</label>
+                    <input type="text" name="aadhaar_number" value="<?php echo htmlspecialchars($teacherProfile['aadhaar_number'] ?? ''); ?>" placeholder="12 digit Aadhaar" class="w-full border p-2.5 rounded font-mono" />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Nationality</label>
+                    <input type="text" name="nationality" value="<?php echo htmlspecialchars($teacherProfile['nationality'] ?? ''); ?>" class="w-full border p-2.5 rounded" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-slate-500 mb-1">Religion</label>
+                    <input type="text" name="religion" value="<?php echo htmlspecialchars($teacherProfile['religion'] ?? ''); ?>" class="w-full border p-2.5 rounded" />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 mb-1">Caste</label>
+                    <input type="text" name="caste" value="<?php echo htmlspecialchars($teacherProfile['caste'] ?? ''); ?>" class="w-full border p-2.5 rounded" />
+                </div>
             </div>
 
             <div>
-                <label class="block text-slate-500 mb-1">Mobile Contact Phone</label>
-                <input type="text" name="phone" value="<?php echo htmlspecialchars($currentUser['phone'] ?? '9482562150'); ?>" class="w-full border p-2.5 rounded focus:ring-1 focus:ring-blue-500" required />
+                <label class="block text-slate-500 mb-1">Professional Experience Summary</label>
+                <textarea name="experience" rows="2" placeholder="e.g. 5 Years teaching, 2 Years industry..." class="w-full border p-2.5 rounded font-medium"><?php echo htmlspecialchars($teacherProfile['experience'] ?? ''); ?></textarea>
             </div>
 
             <div>
-                <label class="block text-slate-500 mb-1">Academic Qualifications</label>
-                <input type="text" value="<?php echo htmlspecialchars($teacherProfile['qualification'] ?? 'Ph.D., IIT Bombay'); ?>" class="w-full border p-2.5 rounded bg-gray-50 text-gray-500" readonly />
+                <label class="block text-slate-500 mb-1">Full Permanent Address</label>
+                <textarea name="address" rows="2" class="w-full border p-2.5 rounded font-medium"><?php echo htmlspecialchars($teacherProfile['address'] ?? ''); ?></textarea>
             </div>
 
-            <div>
-                <label class="block text-slate-500 mb-1">Academic Department Sector</label>
-                <input type="text" value="<?php echo htmlspecialchars($teacherProfile['department_name'] ?? 'CSE'); ?>" class="w-full border p-2.5 rounded bg-gray-50 text-gray-500" readonly />
+            <!-- Supporting Documents Upload -->
+            <div class="space-y-4 border-t border-slate-100 pt-4 text-left">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-4 h-4 text-[#2563EB]"></i>
+                    <h3 class="text-xs uppercase tracking-wider font-extrabold text-[#0F172A]">Supporting Documents</h3>
+                </div>
+
+                <?php
+                $docsQuery = $db->prepare("SELECT * FROM teacher_documents WHERE teacher_profile_id = (SELECT id FROM teacher_profiles WHERE user_id = :uid)");
+                $docsQuery->execute([':uid' => $currentUser['id']]);
+                $teacherDocs = $docsQuery->fetchAll(PDO::FETCH_UNIQUE);
+                ?>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-slate-500 mb-1">Qualification Certificate</label>
+                        <?php if (isset($teacherDocs['qualification_certificate'])): ?>
+                            <div class="mb-2 p-2 bg-slate-50 border rounded flex items-center justify-between">
+                                <a href="uploads/documents/<?php echo htmlspecialchars($teacherDocs['qualification_certificate']['file_path']); ?>" target="_blank" class="text-[#2563EB] hover:underline font-mono truncate mr-2">View Document</a>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold uppercase">Uploaded</span>
+                            </div>
+                        <?php endif; ?>
+                        <input type="file" name="qualification_certificate" class="w-full border p-2 rounded bg-white text-slate-700 font-mono" />
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-500 mb-1">Experience Certificate</label>
+                        <?php if (isset($teacherDocs['experience_certificate'])): ?>
+                            <div class="mb-2 p-2 bg-slate-50 border rounded flex items-center justify-between">
+                                <a href="uploads/documents/<?php echo htmlspecialchars($teacherDocs['experience_certificate']['file_path']); ?>" target="_blank" class="text-[#2563EB] hover:underline font-mono truncate mr-2">View Document</a>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold uppercase">Uploaded</span>
+                            </div>
+                        <?php endif; ?>
+                        <input type="file" name="experience_certificate" class="w-full border p-2 rounded bg-white text-slate-700 font-mono" />
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-500 mb-1">Other Supporting Document</label>
+                        <?php if (isset($teacherDocs['other_document'])): ?>
+                            <div class="mb-2 p-2 bg-slate-50 border rounded flex items-center justify-between">
+                                <a href="uploads/documents/<?php echo htmlspecialchars($teacherDocs['other_document']['file_path']); ?>" target="_blank" class="text-[#2563EB] hover:underline font-mono truncate mr-2">View Document</a>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold uppercase">Uploaded</span>
+                            </div>
+                        <?php endif; ?>
+                        <input type="file" name="other_document" class="w-full border p-2 rounded bg-white text-slate-700 font-mono" />
+                    </div>
+                </div>
             </div>
 
             <div class="pt-4 border-t border-slate-100 flex justify-end">
                 <button type="submit" class="py-2.5 px-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shadow-sm">
-                    Save Profile Changes
+                    <?php echo ($forceProfileCompletion ?? false) ? 'Save Profile & Complete Activation' : 'Save Profile Changes'; ?>
                 </button>
             </div>
         </form>

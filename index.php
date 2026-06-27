@@ -21,8 +21,18 @@ if (!$currentUser) {
     exit;
 }
 
-// 3. Tab Routing Setup
-$currentTab = $_GET['tab'] ?? 'dashboard';
+// 2.5 Force Password Change & Profile Completion
+$forcePasswordChange = ((int)$currentUser['password_changed'] === 0);
+$forceProfileCompletion = ($currentUser['activation_status'] === 'profile_pending');
+
+if ($forcePasswordChange) {
+    $currentTab = 'change_password';
+} elseif ($forceProfileCompletion) {
+    $currentTab = 'profile';
+} else {
+    // 3. Tab Routing Setup
+    $currentTab = $_GET['tab'] ?? 'dashboard';
+}
 
 // Fetch specific profile data
 $studentProfile = null;
@@ -61,7 +71,8 @@ function getPageTitle(string $tab, string $role): string {
         'departments'       => 'Academic bodies & sectors settings',
         'announcements'     => 'Push updates broadcaster',
         'analytics'         => 'Cumulative Campus metrics & score charts',
-        'settings'          => 'Institutional Settings & SQL Backups'
+        'settings'          => 'Institutional Settings & SQL Backups',
+        'directory'         => 'Campus Profiles Directory'
     ];
     return $titlesMap[$tab] ?? 'EduTrack LMS Navigation Portal';
 }
@@ -148,54 +159,65 @@ $pageTitle = getPageTitle($currentTab, $currentUser['role']);
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="h-screen bg-[#F8FAFC] text-[#0F172A] font-sans flex relative overflow-hidden">
-    <!-- Left Navigation Sidebar -->
-    <?php include __DIR__ . '/includes/sidebar.php'; ?>
+    <?php if ($forcePasswordChange): ?>
+        <!-- Fullscreen Forced Password Change Screen -->
+        <div class="w-full h-screen flex items-center justify-center bg-[#0B0F19] p-4">
+            <?php include __DIR__ . '/views/change_password_view.php'; ?>
+        </div>
+    <?php else: ?>
+        <!-- Left Navigation Sidebar -->
+        <?php include __DIR__ . '/includes/sidebar.php'; ?>
 
-    <!-- Main Viewport Area Container -->
-    <div id="main_content_container" class="flex-1 flex flex-col h-screen transition-all duration-300 w-full" style="padding-left: 240px; padding-top: 56px;">
-        <!-- Top Nav Bar Header -->
-        <?php include __DIR__ . '/includes/header.php'; ?>
+        <!-- Main Viewport Area Container -->
+        <div id="main_content_container" class="flex-1 flex flex-col h-screen transition-all duration-300 w-full" style="padding-left: 240px; padding-top: 56px;">
+            <!-- Top Nav Bar Header -->
+            <?php include __DIR__ . '/includes/header.php'; ?>
 
-        <!-- Dynamic Content Router Viewport -->
-        <main class="flex-1 p-6 lg:p-8 overflow-y-auto block select-text">
-            <div class="max-w-7xl mx-auto">
-                <?php 
-                // Display flash alerts if any exist in the session
-                if (isset($_SESSION['flash_success'])) {
-                    echo renderAlert($_SESSION['flash_success'], 'success');
-                    unset($_SESSION['flash_success']);
-                }
-                if (isset($_SESSION['flash_danger'])) {
-                    echo renderAlert($_SESSION['flash_danger'], 'danger');
-                    unset($_SESSION['flash_danger']);
-                }
-                if (isset($_SESSION['flash_warning'])) {
-                    echo renderAlert($_SESSION['flash_warning'], 'warning');
-                    unset($_SESSION['flash_warning']);
-                }
-                if (isset($_SESSION['flash_info'])) {
-                    echo renderAlert($_SESSION['flash_info'], 'info');
-                    unset($_SESSION['flash_info']);
-                }
+            <!-- Dynamic Content Router Viewport -->
+            <main class="flex-1 p-6 lg:p-8 overflow-y-auto block select-text">
+                <div class="max-w-7xl mx-auto">
+                    <?php 
+                    // Display flash alerts if any exist in the session
+                    if (isset($_SESSION['flash_success'])) {
+                        echo renderAlert($_SESSION['flash_success'], 'success');
+                        unset($_SESSION['flash_success']);
+                    }
+                    if (isset($_SESSION['flash_danger'])) {
+                        echo renderAlert($_SESSION['flash_danger'], 'danger');
+                        unset($_SESSION['flash_danger']);
+                    }
+                    if (isset($_SESSION['flash_warning'])) {
+                        echo renderAlert($_SESSION['flash_warning'], 'warning');
+                        unset($_SESSION['flash_warning']);
+                    }
+                    if (isset($_SESSION['flash_info'])) {
+                        echo renderAlert($_SESSION['flash_info'], 'info');
+                        unset($_SESSION['flash_info']);
+                    }
 
-                // Render matching role dashboard
-                switch ($currentUser['role']) {
-                    case 'student':
-                        include __DIR__ . '/views/student_dashboard.php';
-                        break;
-                    case 'teacher':
-                        include __DIR__ . '/views/teacher_dashboard.php';
-                        break;
-                    case 'admin':
-                        include __DIR__ . '/views/admin_dashboard.php';
-                        break;
-                    default:
-                        echo '<div class="flex items-center justify-center h-full p-12 text-center select-none text-slate-400">Unknown user authentication index logs.</div>';
-                }
-                ?>
-            </div>
-        </main>
-    </div>
+                    // Render matching role dashboard
+                    if ($currentTab === 'directory') {
+                        include __DIR__ . '/views/directory.php';
+                    } else {
+                        switch ($currentUser['role']) {
+                            case 'student':
+                                include __DIR__ . '/views/student_dashboard.php';
+                                break;
+                            case 'teacher':
+                                include __DIR__ . '/views/teacher_dashboard.php';
+                                break;
+                            case 'admin':
+                                include __DIR__ . '/views/admin_dashboard.php';
+                                break;
+                            default:
+                                echo '<div class="flex items-center justify-center h-full p-12 text-center select-none text-slate-400">Unknown user authentication index logs.</div>';
+                        }
+                    }
+                    ?>
+                </div>
+            </main>
+        </div>
+    <?php endif; ?>
 
     <!-- Initialize Lucide Icons -->
     <script>

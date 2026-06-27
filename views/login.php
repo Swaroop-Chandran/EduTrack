@@ -4,6 +4,12 @@
 
 $loginError = $_SESSION['login_error'] ?? null;
 unset($_SESSION['login_error']);
+
+$flashSuccess = $_SESSION['flash_success'] ?? null;
+unset($_SESSION['flash_success']);
+
+$flashDanger = $_SESSION['flash_danger'] ?? null;
+unset($_SESSION['flash_danger']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -103,17 +109,35 @@ unset($_SESSION['login_error']);
 
         <!-- Right Side: Form Shell (White panel) -->
         <div class="lg:w-[52%] bg-white flex flex-col justify-between p-8 lg:p-16 min-h-[600px] lg:min-h-screen">
-            <div class="w-full max-w-md mx-auto my-auto space-y-8 animate-fadeIn">
+            <div class="w-full max-w-md mx-auto my-auto space-y-6 animate-fadeIn">
                 <!-- Heading -->
                 <div>
-                    <h2 class="text-2xl lg:text-[28px] font-bold text-[#0F172A] tracking-tight">Institutional Sign In</h2>
-                    <p class="text-[#64748B] text-sm mt-1.5">Please enter your credentials to access the learning portal.</p>
+                    <h2 id="login_panel_title" class="text-2xl lg:text-[28px] font-bold text-[#0F172A] tracking-tight">Institutional Sign In</h2>
+                    <p id="login_panel_desc" class="text-[#64748B] text-sm mt-1.5">Please enter your credentials to access the learning portal.</p>
                 </div>
 
-                <!-- Errors dismissible -->
+                <!-- Tabs -->
+                <div class="flex border-b border-[#E2E8F0] gap-4 mb-4">
+                    <button type="button" onclick="switchTab('signin');" id="btn_tab_signin" class="pb-2 text-sm font-bold border-b-2 border-[#2563EB] text-[#2563EB] cursor-pointer">Sign In</button>
+                    <button type="button" onclick="switchTab('activate');" id="btn_tab_activate" class="pb-2 text-sm font-semibold border-b-2 border-transparent text-[#64748B] hover:text-[#0F172A] cursor-pointer">Activate Account</button>
+                </div>
+
+                <!-- Session Alerts -->
+                <?php if ($flashSuccess): ?>
+                    <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-lg text-emerald-600 text-xs flex items-start gap-3 relative animate-fadeIn">
+                        <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+                        <div class="flex-1 font-medium"><?php echo htmlspecialchars($flashSuccess); ?></div>
+                    </div>
+                <?php endif; ?>
+                <?php if ($flashDanger): ?>
+                    <div class="p-4 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs flex items-start gap-3 relative animate-shake">
+                        <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+                        <div class="flex-1 font-medium"><?php echo htmlspecialchars($flashDanger); ?></div>
+                    </div>
+                <?php endif; ?>
                 <?php if ($loginError): ?>
-                    <div id="login_error_box" class="p-4 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm flex items-start gap-3 relative animate-shake">
-                        <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+                    <div id="login_error_box" class="p-4 bg-red-50 border border-red-100 rounded-lg text-red-600 text-xs flex items-start gap-3 relative animate-shake">
+                        <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
                         <div class="flex-1 font-medium"><?php echo htmlspecialchars($loginError); ?></div>
                         <button onclick="document.getElementById('login_error_box').style.display='none';" class="text-red-400 hover:text-red-600">
                             <i data-lucide="x" class="w-4 h-4"></i>
@@ -121,19 +145,19 @@ unset($_SESSION['login_error']);
                     </div>
                 <?php endif; ?>
 
-                <!-- Interactive Form -->
-                <form action="actions.php?action=login" method="POST" class="space-y-5">
+                <!-- Sign In Form -->
+                <form id="signin_form" action="actions.php?action=login" method="POST" class="space-y-5">
                     <div>
                         <label for="email_addr" class="block text-xs font-semibold text-[#64748B] mb-2">
-                            Institutional Email
+                            Institutional Email / Admission No / Employee ID
                         </label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[#94A3B8] font-medium text-sm">@</span>
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[#94A3B8] font-semibold text-xs">ID</span>
                             <input
                                 id="email_addr"
                                 name="email"
-                                type="email"
-                                placeholder="name@institution.edu"
+                                type="text"
+                                placeholder="Admission No, Emp ID, or email..."
                                 class="w-full pl-9 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all"
                                 required
                             />
@@ -161,7 +185,7 @@ unset($_SESSION['login_error']);
                             />
                             <button
                                 type="button"
-                                onclick="togglePasswordVisibility();"
+                                onclick="togglePasswordVisibility('password_input', 'password_eye_icon');"
                                 class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-[#0F172A]"
                             >
                                 <i id="password_eye_icon" data-lucide="eye" class="w-4 h-4 text-[#94A3B8]"></i>
@@ -183,10 +207,95 @@ unset($_SESSION['login_error']);
                     <!-- Submit Button -->
                     <button
                         type="submit"
-                        class="w-full py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg text-sm font-semibold tracking-wide transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2563EB] shadow-sm flex items-center justify-center gap-2"
+                        class="w-full py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg text-sm font-semibold tracking-wide transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2563EB] shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <span>Sign In</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </form>
+
+                <!-- First-time Activation Form -->
+                <form id="activate_form" action="actions.php?action=activate_account" method="POST" class="space-y-4 hidden font-semibold text-xs">
+                    <div>
+                        <label class="block text-[#64748B] mb-1.5 font-bold">Select Role Context</label>
+                        <select name="role" id="activate_role" onchange="toggleIdentifierPlaceholder();" class="w-full px-3 py-2.5 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]" required>
+                            <option value="student">Student Scholar</option>
+                            <option value="teacher">Faculty Professor</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="activate_identifier" id="activate_identifier_label" class="block text-[#64748B] mb-1.5 font-bold">Admission Number</label>
+                        <input
+                            id="activate_identifier"
+                            name="identifier"
+                            type="text"
+                            placeholder="e.g. ADM-2026-001"
+                            class="w-full px-3 py-2.5 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label for="activate_verification" class="block text-[#64748B] mb-1.5 font-bold">Verification: Date of Birth OR Registered Mobile/Email</label>
+                        <input
+                            id="activate_verification"
+                            name="verification_val"
+                            type="text"
+                            placeholder="e.g. YYYY-MM-DD or registered email/phone"
+                            class="w-full px-3 py-2.5 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label for="activate_new_password" class="block text-[#64748B] mb-1.5 font-bold">Create Password</label>
+                        <div class="relative">
+                            <input
+                                id="activate_new_password"
+                                name="new_password"
+                                type="password"
+                                placeholder="••••••••"
+                                class="w-full px-3 py-2.5 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] font-mono"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onclick="togglePasswordVisibility('activate_new_password', 'activate_eye_icon1');"
+                                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-[#0F172A]"
+                            >
+                                <i id="activate_eye_icon1" data-lucide="eye" class="w-4 h-4 text-[#94A3B8]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="activate_confirm_password" class="block text-[#64748B] mb-1.5 font-bold">Confirm Password</label>
+                        <div class="relative">
+                            <input
+                                id="activate_confirm_password"
+                                name="confirm_password"
+                                type="password"
+                                placeholder="••••••••"
+                                class="w-full px-3 py-2.5 bg-white border border-[#E2E8F0] rounded-lg text-sm text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] font-mono"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onclick="togglePasswordVisibility('activate_confirm_password', 'activate_eye_icon2');"
+                                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-[#0F172A]"
+                            >
+                                <i id="activate_eye_icon2" data-lucide="eye" class="w-4 h-4 text-[#94A3B8]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full py-2.5 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg text-sm font-semibold tracking-wide transition-colors duration-150 shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-4"
+                    >
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                        <span>Activate My Account</span>
                     </button>
                 </form>
 
@@ -253,13 +362,52 @@ unset($_SESSION['login_error']);
 
     <script>
         function handleQuickLogin(email, password) {
+            switchTab('signin');
             document.getElementById('email_addr').value = email;
             document.getElementById('password_input').value = password;
         }
 
-        function togglePasswordVisibility() {
-            const input = document.getElementById('password_input');
-            const icon = document.getElementById('password_eye_icon');
+        function switchTab(tabId) {
+            const btnSignin = document.getElementById('btn_tab_signin');
+            const btnActivate = document.getElementById('btn_tab_activate');
+            const formSignin = document.getElementById('signin_form');
+            const formActivate = document.getElementById('activate_form');
+            const title = document.getElementById('login_panel_title');
+            const desc = document.getElementById('login_panel_desc');
+
+            if (tabId === 'signin') {
+                btnSignin.className = "pb-2 text-sm font-bold border-b-2 border-[#2563EB] text-[#2563EB] cursor-pointer";
+                btnActivate.className = "pb-2 text-sm font-semibold border-b-2 border-transparent text-[#64748B] hover:text-[#0F172A] cursor-pointer";
+                formSignin.classList.remove('hidden');
+                formActivate.classList.add('hidden');
+                title.innerText = "Institutional Sign In";
+                desc.innerText = "Please enter your credentials to access the learning portal.";
+            } else {
+                btnSignin.className = "pb-2 text-sm font-semibold border-b-2 border-transparent text-[#64748B] hover:text-[#0F172A] cursor-pointer";
+                btnActivate.className = "pb-2 text-sm font-bold border-b-2 border-[#2563EB] text-[#2563EB] cursor-pointer";
+                formSignin.classList.add('hidden');
+                formActivate.classList.remove('hidden');
+                title.innerText = "Activate Your Account";
+                desc.innerText = "Verification details matching institutional registrar data is required.";
+            }
+        }
+
+        function toggleIdentifierPlaceholder() {
+            const role = document.getElementById('activate_role').value;
+            const label = document.getElementById('activate_identifier_label');
+            const input = document.getElementById('activate_identifier');
+            if (role === 'student') {
+                label.innerText = "Admission Number";
+                input.placeholder = "e.g. ADM-2026-001";
+            } else {
+                label.innerText = "Employee ID / Badge Code";
+                input.placeholder = "e.g. EMP-CSE-001";
+            }
+        }
+
+        function togglePasswordVisibility(inputId, eyeId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(eyeId);
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.setAttribute('data-lucide', 'eye-off');

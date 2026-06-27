@@ -6,7 +6,12 @@ if (!isset($currentUser)) {
 }
 
 // Define nav items based on user role
-function getNavItems(string $role): array {
+function getNavItems(string $role, bool $forceProfileCompletion = false): array {
+    if ($forceProfileCompletion) {
+        return [
+            ['id' => 'profile', 'name' => 'Complete Profile', 'icon' => 'user-square-2']
+        ];
+    }
     switch ($role) {
         case 'student':
             return [
@@ -27,6 +32,7 @@ function getNavItems(string $role): array {
                 ['id' => 'attendance', 'name' => 'Take Attendance', 'icon' => 'check-square'],
                 ['id' => 'exams', 'name' => 'Exams & Results', 'icon' => 'calendar-clock'],
                 ['id' => 'analytics', 'name' => 'Course Analytics', 'icon' => 'line-chart'],
+                ['id' => 'directory', 'name' => 'Profiles Directory', 'icon' => 'contact-2'],
                 ['id' => 'profile', 'name' => 'Teacher Profile', 'icon' => 'user-square-2']
             ];
         case 'admin':
@@ -38,6 +44,7 @@ function getNavItems(string $role): array {
                 ['id' => 'courses', 'name' => 'Courses Config', 'icon' => 'book-open'],
                 ['id' => 'placements', 'name' => 'Placement Cell', 'icon' => 'briefcase'],
                 ['id' => 'announcements', 'name' => 'Announcements', 'icon' => 'megaphone'],
+                ['id' => 'directory', 'name' => 'Profiles Directory', 'icon' => 'contact-2'],
                 ['id' => 'analytics', 'name' => 'Campus Analytics', 'icon' => 'activity']
             ];
         default:
@@ -45,7 +52,7 @@ function getNavItems(string $role): array {
     }
 }
 
-$navItems = getNavItems($currentUser['role']);
+$navItems = getNavItems($currentUser['role'], $forceProfileCompletion ?? false);
 
 // Role Badge styling
 $badgeColor = 'bg-gray-500/20 text-gray-400';

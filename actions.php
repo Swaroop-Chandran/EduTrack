@@ -18,7 +18,8 @@ $protectedActions = [
     'edit_department', 'add_course', 'edit_course', 'add_enrollment',
     'remove_enrollment', 'add_placement', 'update_placement_status',
     'update_placement_app_status', 'send_announcement',
-    'mark_notification_read', 'clear_notifications', 'edit_profile'
+    'mark_notification_read', 'clear_notifications', 'edit_profile',
+    'force_change_password', 'reset_password', 'promote_students', 'toggle_user_status'
 ];
 
 if (in_array($action, $protectedActions) && !isset($_SESSION['user_id'])) {
@@ -51,8 +52,18 @@ switch ($action) {
             exit;
         }
 
-        $stmt = $db->prepare("SELECT * FROM users WHERE email = :email");
-        $stmt->execute([':email' => $email]);
+        $stmt = $db->prepare("
+            SELECT u.* 
+            FROM users u
+            LEFT JOIN student_profiles sp ON u.id = sp.user_id
+            LEFT JOIN teacher_profiles tp ON u.id = tp.user_id
+            WHERE u.email = :login_id1 OR sp.roll_no = :login_id2 OR tp.employee_id = :login_id3
+        ");
+        $stmt->execute([
+            ':login_id1' => $email,
+            ':login_id2' => $email,
+            ':login_id3' => $email
+        ]);
         $user = $stmt->fetch();
 
         if (!$user) {
@@ -487,25 +498,36 @@ switch ($action) {
         $email = trim($_POST['email'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
         $rollNo = trim($_POST['roll_no'] ?? '');
+        $admissionNo = trim($_POST['admission_no'] ?? '');
+        if ($admissionNo === '') {
+            $admissionNo = $rollNo;
+        }
+        $programme = trim($_POST['programme'] ?? 'B.Tech');
+        $section = trim($_POST['section'] ?? 'A');
         $deptId = (int)($_POST['department_id'] ?? 1);
         $year = (int)($_POST['year'] ?? 1);
         $semester = (int)($_POST['semester'] ?? 1);
         $dob = trim($_POST['dob'] ?? '');
         $address = trim($_POST['address'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+        if ($password === '') {
+            $password = $admissionNo;
+        }
 
         // Create User
-        $userStmt = $db->prepare("INSERT INTO users (name, email, password, role, avatar, phone, status) 
-                                  VALUES (:name, :email, 'student123', 'student', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', :phone, 'active')");
+        $userStmt = $db->prepare("INSERT INTO users (name, email, password, role, avatar, phone, status, password_changed) 
+                                  VALUES (:name, :email, :password, 'student', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', :phone, 'active', 0)");
         $userStmt->execute([
             ':name' => $name,
             ':email' => $email,
+            ':password' => $password,
             ':phone' => $phone
         ]);
         $newUserId = $db->lastInsertId();
 
         // Create Profile
-        $profStmt = $db->prepare("INSERT INTO student_profiles (user_id, roll_no, department_id, year, semester, cgpa, dob, address) 
-                                  VALUES (:user_id, :roll_no, :dept_id, :year, :semester, 0.00, :dob, :address)");
+        $profStmt = $db->prepare("INSERT INTO student_profiles (user_id, roll_no, department_id, year, semester, cgpa, dob, address, admission_no, programme, section) 
+                                  VALUES (:user_id, :roll_no, :dept_id, :year, :semester, 0.00, :dob, :address, :admission_no, :programme, :section)");
         $profStmt->execute([
             ':user_id' => $newUserId,
             ':roll_no' => $rollNo,
@@ -513,7 +535,10 @@ switch ($action) {
             ':year' => $year,
             ':semester' => $semester,
             ':dob' => $dob ?: null,
-            ':address' => $address
+            ':address' => $address,
+            ':admission_no' => $admissionNo,
+            ':programme' => $programme,
+            ':section' => $section
         ]);
 
         // Send Notification
@@ -539,6 +564,12 @@ switch ($action) {
         $email = trim($_POST['email'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
         $rollNo = trim($_POST['roll_no'] ?? '');
+        $admissionNo = trim($_POST['admission_no'] ?? '');
+        if ($admissionNo === '') {
+            $admissionNo = $rollNo;
+        }
+        $programme = trim($_POST['programme'] ?? 'B.Tech');
+        $section = trim($_POST['section'] ?? 'A');
         $deptId = (int)($_POST['department_id'] ?? 1);
         $year = (int)($_POST['year'] ?? 1);
         $semester = (int)($_POST['semester'] ?? 1);
@@ -556,8 +587,8 @@ switch ($action) {
 
         // Update Profile
         $profStmt = $db->prepare("UPDATE student_profiles 
-                                  SET roll_no = :roll_no, department_id = :dept_id, year = :year, semester = :semester, dob = :dob, address = :address 
-                                  WHERE user_id = :user_id");
+                                   SET roll_no = :roll_no, department_id = :dept_id, year = :year, semester = :semester, dob = :dob, address = :address, admission_no = :admission_no, programme = :programme, section = :section 
+                                   WHERE user_id = :user_id");
         $profStmt->execute([
             ':roll_no' => $rollNo,
             ':dept_id' => $deptId,
@@ -565,6 +596,9 @@ switch ($action) {
             ':semester' => $semester,
             ':dob' => $dob ?: null,
             ':address' => $address,
+            ':admission_no' => $admissionNo,
+            ':programme' => $programme,
+            ':section' => $section,
             ':user_id' => $userId
         ]);
 
@@ -595,13 +629,18 @@ switch ($action) {
         $deptId = (int)($_POST['department_id'] ?? 1);
         $designation = trim($_POST['designation'] ?? '');
         $qualification = trim($_POST['qualification'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+        if ($password === '') {
+            $password = $empId;
+        }
 
         // Create User
-        $userStmt = $db->prepare("INSERT INTO users (name, email, password, role, avatar, phone, status) 
-                                  VALUES (:name, :email, 'teacher123', 'teacher', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150', :phone, 'active')");
+        $userStmt = $db->prepare("INSERT INTO users (name, email, password, role, avatar, phone, status, password_changed, activation_status) 
+                                  VALUES (:name, :email, :password, 'teacher', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150', :phone, 'inactive', 0, 'inactive')");
         $userStmt->execute([
             ':name' => $name,
             ':email' => $email,
+            ':password' => $password,
             ':phone' => $phone
         ]);
         $newUserId = $db->lastInsertId();
@@ -1210,7 +1249,8 @@ switch ($action) {
                     mother_email = :mother_email,
                     mother_occupation = :mother_occupation,
                     annual_income = :annual_income,
-                    present_address = :present_address
+                    present_address = :present_address,
+                    personal_email = :personal_email
                 WHERE user_id = :user_id
             ");
             $pStmt->execute([
@@ -1232,29 +1272,333 @@ switch ($action) {
                 ':mother_occupation' => $mother_occupation ?: null,
                 ':annual_income' => ($annual_income !== '') ? floatval($annual_income) : null,
                 ':present_address' => $present_address ?: null,
+                ':personal_email' => $personal_email ?: null,
                 ':user_id' => $currentUser['id']
             ]);
 
         } else {
             // Logic for non-student profiles
             $phone = trim($_POST['phone'] ?? '');
-            $dob = trim($_POST['dob'] ?? '');
-            $address = trim($_POST['address'] ?? '');
 
             $uStmt = $db->prepare("UPDATE users SET phone = :phone WHERE id = :id");
             $uStmt->execute([':phone' => $phone, ':id' => $currentUser['id']]);
 
             if ($currentUser['role'] === 'teacher') {
-                $pStmt = $db->prepare("UPDATE teacher_profiles SET dob = :dob, address = :address WHERE user_id = :user_id");
-                // Wait, teacher_profiles doesn't have dob or address? Let's check original. Original was only:
-                // if ($currentUser['role'] === 'student') { UPDATE student_profiles ... }
-                // So original didn't update teacher profiles (since teacher profile table doesn't have dob/address).
-                // Let's keep it safe.
+                $dob = trim($_POST['dob'] ?? '');
+                $gender = trim($_POST['gender'] ?? '');
+                $religion = trim($_POST['religion'] ?? '');
+                $caste = trim($_POST['caste'] ?? '');
+                $nationality = trim($_POST['nationality'] ?? '');
+                $blood_group = trim($_POST['blood_group'] ?? '');
+                $aadhaar_number = trim($_POST['aadhaar_number'] ?? '');
+                $address = trim($_POST['address'] ?? '');
+                $experience = trim($_POST['experience'] ?? '');
+                $personal_email = trim($_POST['personal_email'] ?? '');
+
+                $pStmt = $db->prepare("
+                    UPDATE teacher_profiles 
+                    SET dob = :dob, 
+                        gender = :gender, 
+                        religion = :religion, 
+                        caste = :caste, 
+                        nationality = :nationality, 
+                        blood_group = :blood_group, 
+                        aadhaar_number = :aadhaar_number, 
+                        address = :address,
+                        experience = :experience,
+                        personal_email = :personal_email
+                    WHERE user_id = :user_id
+                ");
+                $pStmt->execute([
+                    ':dob' => $dob ?: null,
+                    ':gender' => $gender ?: null,
+                    ':religion' => $religion ?: null,
+                    ':caste' => $caste ?: null,
+                    ':nationality' => $nationality ?: null,
+                    ':blood_group' => $blood_group ?: null,
+                    ':aadhaar_number' => $aadhaar_number ?: null,
+                    ':address' => $address ?: null,
+                    ':experience' => $experience ?: null,
+                    ':personal_email' => $personal_email ?: null,
+                    ':user_id' => $currentUser['id']
+                ]);
+
+                // Handle Teacher Document Uploads
+                $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+                $teacherDocKeys = [
+                    'qualification_certificate',
+                    'experience_certificate',
+                    'other_document'
+                ];
+
+                $uploadedTeacherDocs = [];
+                foreach ($teacherDocKeys as $docKey) {
+                    if (isset($_FILES[$docKey]) && $_FILES[$docKey]['error'] === UPLOAD_ERR_OK) {
+                        $file = $_FILES[$docKey];
+                        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                        if ($file['size'] <= 10 * 1024 * 1024 && in_array($ext, $allowedExtensions)) {
+                            $uploadedTeacherDocs[$docKey] = $file;
+                        }
+                    }
+                }
+
+                $tpStmt = $db->prepare("SELECT id FROM teacher_profiles WHERE user_id = :user_id");
+                $tpStmt->execute([':user_id' => $currentUser['id']]);
+                $teacherProfileId = $tpStmt->fetchColumn();
+
+                if ($teacherProfileId) {
+                    $docsDir = __DIR__ . '/uploads/documents/';
+                    if (!file_exists($docsDir)) {
+                        mkdir($docsDir, 0777, true);
+                    }
+
+                    foreach ($uploadedTeacherDocs as $docType => $file) {
+                        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                        $safeName = 'teacher_' . $teacherProfileId . '_' . $docType . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                        $targetPath = $docsDir . $safeName;
+                        
+                        $existingStmt = $db->prepare("SELECT file_path FROM teacher_documents WHERE teacher_profile_id = :profile_id AND document_type = :doc_type");
+                        $existingStmt->execute([
+                            ':profile_id' => $teacherProfileId,
+                            ':doc_type' => $docType
+                        ]);
+                        $oldFile = $existingStmt->fetchColumn();
+
+                        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                            if ($oldFile) {
+                                $oldFilePath = $docsDir . basename($oldFile);
+                                if (file_exists($oldFilePath)) {
+                                    unlink($oldFilePath);
+                                }
+                            }
+                            
+                            $docInsert = $db->prepare("
+                                INSERT INTO teacher_documents (teacher_profile_id, document_type, file_path, uploaded_at)
+                                VALUES (:profile_id, :doc_type, :file_path, NOW())
+                                ON DUPLICATE KEY UPDATE file_path = VALUES(file_path), uploaded_at = NOW()
+                            ");
+                            $docInsert->execute([
+                                ':profile_id' => $teacherProfileId,
+                                ':doc_type' => $docType,
+                                ':file_path' => $safeName
+                            ]);
+                        }
+                    }
+                }
             }
         }
 
-        $_SESSION['flash_success'] = 'Institutional Profile details updated successfully.';
+        if ($currentUser['activation_status'] === 'profile_pending') {
+            $upStatus = $db->prepare("UPDATE users SET activation_status = 'active' WHERE id = :id");
+            $upStatus->execute([':id' => $currentUser['id']]);
+            $_SESSION['flash_success'] = 'Institutional Profile details completed. Your account is now fully active!';
+        } else {
+            $_SESSION['flash_success'] = 'Institutional Profile details updated successfully.';
+        }
         header('Location: index.php?tab=profile');
+        exit;
+
+    case 'force_change_password':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+        $newPassword = trim($_POST['new_password'] ?? '');
+        $confirmPassword = trim($_POST['confirm_password'] ?? '');
+        if (empty($newPassword)) {
+            $_SESSION['flash_danger'] = 'New password cannot be empty.';
+            header('Location: index.php');
+            exit;
+        }
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['flash_danger'] = 'Passwords do not match.';
+            header('Location: index.php');
+            exit;
+        }
+        $stmt = $db->prepare("UPDATE users SET password = :password, password_changed = 1 WHERE id = :id");
+        $stmt->execute([':password' => $newPassword, ':id' => $currentUser['id']]);
+        $_SESSION['flash_success'] = 'Password changed successfully! Welcome to your dashboard.';
+        header('Location: index.php');
+        exit;
+
+    case 'reset_password':
+        if ($currentUser['role'] !== 'admin') {
+            $_SESSION['flash_danger'] = 'Access denied.';
+            header('Location: index.php');
+            exit;
+        }
+        $userId = (int)($_GET['user_id'] ?? 0);
+        $uStmt = $db->prepare("SELECT * FROM users WHERE id = :id");
+        $uStmt->execute([':id' => $userId]);
+        $targetUser = $uStmt->fetch();
+        if ($targetUser) {
+            $defaultPassword = 'password123';
+            if ($targetUser['role'] === 'student') {
+                $sp = $db->prepare("SELECT roll_no, admission_no FROM student_profiles WHERE user_id = :uid");
+                $sp->execute([':uid' => $userId]);
+                $spObj = $sp->fetch();
+                $defaultPassword = $spObj['admission_no'] ?: ($spObj['roll_no'] ?: 'student123');
+            } elseif ($targetUser['role'] === 'teacher') {
+                $tp = $db->prepare("SELECT employee_id FROM teacher_profiles WHERE user_id = :uid");
+                $tp->execute([':uid' => $userId]);
+                $tpObj = $tp->fetch();
+                $defaultPassword = $tpObj['employee_id'] ?: 'teacher123';
+            }
+            $resetStmt = $db->prepare("UPDATE users SET password = :password, password_changed = 0 WHERE id = :id");
+            $resetStmt->execute([':password' => $defaultPassword, ':id' => $userId]);
+            $_SESSION['flash_success'] = "Password reset successfully for {$targetUser['name']}! Default is set to their identifier, and they will be forced to change it on next login.";
+        }
+        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
+        exit;
+
+    case 'promote_students':
+        if ($currentUser['role'] !== 'admin') {
+            $_SESSION['flash_danger'] = 'Access denied.';
+            header('Location: index.php');
+            exit;
+        }
+        $deptId = (int)($_POST['department_id'] ?? 0);
+        $semId = (int)($_POST['semester_filter'] ?? 0);
+
+        if ($deptId <= 0 || $semId <= 0) {
+            $_SESSION['flash_danger'] = 'Please select a department and semester to promote.';
+            header('Location: index.php?tab=students');
+            exit;
+        }
+
+        $stmt = $db->prepare("SELECT sp.user_id, sp.semester FROM student_profiles sp JOIN users u ON sp.user_id = u.id WHERE sp.department_id = :dept_id AND sp.semester = :sem AND sp.is_archived = 0");
+        $stmt->execute([':dept_id' => $deptId, ':sem' => $semId]);
+        $studentsToPromote = $stmt->fetchAll();
+
+        $promotedCount = 0;
+        $graduatedCount = 0;
+
+        foreach ($studentsToPromote as $s) {
+            $currentSem = (int)$s['semester'];
+            if ($currentSem >= 8) {
+                $archStmt = $db->prepare("UPDATE student_profiles SET is_archived = 1 WHERE user_id = :uid");
+                $archStmt->execute([':uid' => $s['user_id']]);
+                $deactStmt = $db->prepare("UPDATE users SET status = 'inactive' WHERE id = :uid");
+                $deactStmt->execute([':uid' => $s['user_id']]);
+                $graduatedCount++;
+            } else {
+                $nextSem = $currentSem + 1;
+                $nextYear = (int)ceil($nextSem / 2);
+                $upStmt = $db->prepare("UPDATE student_profiles SET semester = :sem, year = :year WHERE user_id = :uid");
+                $upStmt->execute([':sem' => $nextSem, ':year' => $nextYear, ':uid' => $s['user_id']]);
+                $promotedCount++;
+            }
+        }
+
+        $_SESSION['flash_success'] = "Promoted {$promotedCount} students. Archived {$graduatedCount} graduated senior students.";
+        header('Location: index.php?tab=students');
+        exit;
+
+    case 'toggle_user_status':
+        if ($currentUser['role'] !== 'admin') {
+            $_SESSION['flash_danger'] = 'Access denied.';
+            header('Location: index.php');
+            exit;
+        }
+        $userId = (int)($_GET['user_id'] ?? 0);
+        $status = $_GET['status'] ?? 'active';
+        if ($userId > 0 && in_array($status, ['active', 'inactive'])) {
+            $stmt = $db->prepare("UPDATE users SET status = :status WHERE id = :id");
+            $stmt->execute([':status' => $status, ':id' => $userId]);
+            $_SESSION['flash_success'] = "User account status updated to " . strtoupper($status) . ".";
+        }
+        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? 'index.php'));
+        exit;
+
+    case 'activate_account':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        $role = trim($_POST['role'] ?? '');
+        $identifier = trim($_POST['identifier'] ?? '');
+        $verificationVal = trim($_POST['verification_val'] ?? '');
+        $newPassword = trim($_POST['new_password'] ?? '');
+        $confirmPassword = trim($_POST['confirm_password'] ?? '');
+
+        if ($role === '' || $identifier === '' || $verificationVal === '' || $newPassword === '') {
+            $_SESSION['flash_danger'] = 'All fields are required for account activation.';
+            header('Location: index.php');
+            exit;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['flash_danger'] = 'Create Password and Confirm Password do not match.';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Find user by role and identifier
+        $user = null;
+        if ($role === 'student') {
+            $stmt = $db->prepare("
+                SELECT u.*, sp.dob 
+                FROM users u
+                JOIN student_profiles sp ON u.id = sp.user_id
+                WHERE u.role = 'student' AND sp.admission_no = :identifier
+            ");
+            $stmt->execute([':identifier' => $identifier]);
+            $user = $stmt->fetch();
+        } elseif ($role === 'teacher') {
+            $stmt = $db->prepare("
+                SELECT u.*, tp.dob 
+                FROM users u
+                JOIN teacher_profiles tp ON u.id = tp.user_id
+                WHERE u.role = 'teacher' AND tp.employee_id = :identifier
+            ");
+            $stmt->execute([':identifier' => $identifier]);
+            $user = $stmt->fetch();
+        }
+
+        if (!$user) {
+            $_SESSION['flash_danger'] = 'Account record not found in the institution registry.';
+            header('Location: index.php');
+            exit;
+        }
+
+        if ($user['activation_status'] !== 'inactive') {
+            $_SESSION['flash_danger'] = 'This account is already activated. Please sign in or use forgot password.';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Verification validation
+        $verified = false;
+        if (!empty($user['dob']) && $verificationVal === $user['dob']) {
+            $verified = true;
+        } elseif ($verificationVal === $user['email'] || $verificationVal === $user['phone']) {
+            $verified = true;
+        }
+
+        if (!$verified) {
+            $_SESSION['flash_danger'] = 'Verification failed. Date of birth, email, or mobile number did not match the registered record.';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Perform activation
+        $actStmt = $db->prepare("
+            UPDATE users 
+            SET password = :password, 
+                status = 'active', 
+                activation_status = 'profile_pending', 
+                password_changed = 1,
+                activated_at = NOW() 
+            WHERE id = :id
+        ");
+        $actStmt->execute([
+            ':password' => $newPassword,
+            ':id' => $user['id']
+        ]);
+
+        $_SESSION['flash_success'] = 'Account activated successfully! Please sign in with your new password to complete your profile.';
+        header('Location: index.php');
         exit;
 
     default:
